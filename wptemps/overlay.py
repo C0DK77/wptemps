@@ -125,8 +125,10 @@ class OverlayController(AppKit.NSObject):
         return self
 
     def _color(self):
+        # sRGB pour correspondre exactement a la couleur choisie dans le selecteur
+        # (qui lit/ecrit en sRGB) ; l'espace calibre (gamma 2.2) donnerait un decalage.
         r, g, b = self.cfg.color
-        return AppKit.NSColor.colorWithCalibratedRed_green_blue_alpha_(
+        return AppKit.NSColor.colorWithSRGBRed_green_blue_alpha_(
             r / 255.0, g / 255.0, b / 255.0, self.cfg.opacity / 255.0)
 
     def _attributes(self):
