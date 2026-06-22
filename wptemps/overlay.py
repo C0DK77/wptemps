@@ -84,7 +84,8 @@ class DraggableWindow(AppKit.NSWindow):
                 p.x - self._drag_offset.x, p.y - self._drag_offset.y))
 
     def mouseUp_(self, event):
-        if self._draggable and self._on_moved is not None:
+        # ne persister que si un drag a reellement commence (mouseDown recu)
+        if self._draggable and self._drag_offset is not None and self._on_moved is not None:
             o = self.frame().origin
             self._on_moved(o.x, o.y)
         self._drag_offset = None
