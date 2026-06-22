@@ -105,11 +105,12 @@ def test_machine_header_lines_omits_missing():
 
 def test_compose_text_with_header_and_power():
     from wptemps.overlay import compose_text
+    from wptemps.config import Config
     from wptemps.metrics.base import Metrics
     from wptemps.sysinfo import MachineInfo
     mi = MachineInfo(os_version="15.6.1")
     m = Metrics(cpu_temp=55.0, cpu_load=10.0, cpu_power=4.2)
-    txt = compose_text(mi, m, show_machine=True, show_power=True)
+    txt = compose_text(mi, m, Config(show_machine_info=True, show_power=True))
     lines = txt.split("\n")
     assert lines[0] == "macOS 15.6.1"
     assert "────────────" in lines
@@ -118,10 +119,61 @@ def test_compose_text_with_header_and_power():
 
 def test_compose_text_machine_off():
     from wptemps.overlay import compose_text
+    from wptemps.config import Config
     from wptemps.metrics.base import Metrics
     from wptemps.sysinfo import MachineInfo
     txt = compose_text(MachineInfo(os_version="15.6.1"), Metrics(cpu_temp=55.0),
-                       show_machine=False, show_power=False)
+                       Config(show_machine_info=False, show_power=False))
     assert "macOS" not in txt
     assert "────────────" not in txt
     assert txt.split("\n")[0].startswith("CPU")
+
+
+def test_format_uptime():
+    from wptemps.overlay import format_uptime
+    assert format_uptime(10 * 86400 + 2 * 3600 + 7 * 60) == "10d 2h"
+    assert format_uptime(2 * 3600 + 7 * 60) == "2h 7m"
+    assert format_uptime(5 * 60) == "5m"
+    assert format_uptime(None) is None
+
+
+def test_format_net():
+    from wptemps.overlay import format_net
+    assert format_net(120.0, 30.0) == "↓120 ↑30 KB/s"
+    assert format_net(2048.0, 1024.0) == "↓2.0 ↑1.0 MB/s"
+    assert format_net(None, 5.0) is None
+
+
+def test_format_swap():
+    from wptemps.overlay import format_swap
+    assert format_swap(0.7, 2.0) == "0.7 / 2.0 GB"
+    assert format_swap(None, 2.0) is None
+
+
+def test_compose_text_inserts_swap_uptime_net():
+    from wptemps.overlay import compose_text
+    from wptemps.config import Config
+    from wptemps.metrics.base import Metrics
+    from wptemps.sysinfo import MachineInfo
+    m = Metrics(cpu_temp=55.0, cpu_load=10.0, ram_used_gb=9.0, ram_total_gb=16.0,
+                swap_used_gb=0.7, swap_total_gb=2.0, uptime_seconds=3600 * 5,
+                net_down_kbps=120.0, net_up_kbps=30.0)
+    cfg = Config(show_machine_info=False, show_swap=True, show_uptime=True, show_net=True)
+    lines = compose_text(MachineInfo(), m, cfg).split("\n")
+    assert any(l == "SWAP 0.7 / 2.0 GB" for l in lines)
+    assert any(l == "UP   5h 0m" for l in lines)
+    assert any(l == "NET  ↓120 ↑30 KB/s" for l in lines)
+    assert lines.index("SWAP 0.7 / 2.0 GB") == lines.index("RAM  9.0 / 16.0 GB") + 1
+
+
+def test_compose_text_details_on_gpu_line():
+    from wptemps.overlay import compose_text
+    from wptemps.config import Config
+    from wptemps.metrics.base import Metrics
+    from wptemps.sysinfo import MachineInfo
+    m = Metrics(cpu_temp=55.0, cpu_load=10.0, gpu_temp=46.0, gpu_load=2.0,
+                cpu_freq_mhz=3400, gpu_freq_mhz=416)
+    cfg = Config(show_machine_info=False, show_details=True)
+    lines = compose_text(MachineInfo(), m, cfg).split("\n")
+    assert lines[0] == "CPU  55°C  10%  3.4GHz"
+    assert lines[1] == "GPU  46°C  2%  416MHz"
