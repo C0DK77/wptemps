@@ -22,7 +22,8 @@ Une icône 🌡 apparaît dans la barre de menus. Le menu permet d'afficher/masq
 de **déverrouiller pour déplacer** l'affichage (puis le reverrouiller), de choisir
 **Police…** (police, taille, gras/italique), **Couleur…** (couleur + opacité) et
 **Alignement** (gauche/centre/droite), **Infos machine** (en-tête OS / modèle / puce /
-cœurs / RAM / disque) et **Conso (watts)** (puissance CPU/GPU), et de quitter. Tous ces
+cœurs / RAM / disque), **Conso (watts)** (puissance CPU/GPU), **Détails CPU/GPU**
+(% GPU + fréquences), **Swap**, **Uptime** et **Réseau ↓/↑** (débit), et de quitter. Tous ces
 réglages — et la position — sont mémorisés dans `~/Library/Application Support/wptemps/settings.json`.
 Ton fond d'écran n'est **jamais modifié**.
 

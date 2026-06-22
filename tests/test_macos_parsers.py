@@ -40,3 +40,18 @@ def test_metrics_from_macmon_extracts_power():
     d = metrics_from_macmon(sample)
     assert d["cpu_power"] == 4.25
     assert d["gpu_power"] == 0.12
+
+
+def test_metrics_from_macmon_extracts_details_and_swap():
+    sample = dict(SAMPLE)
+    sample["gpu_usage"] = [416, 0.01]
+    sample["pcpu_usage"] = [3400, 0.08]
+    sample["memory"] = dict(SAMPLE["memory"])
+    sample["memory"]["swap_usage"] = 783351808
+    sample["memory"]["swap_total"] = 2147483648
+    d = metrics_from_macmon(sample)
+    assert d["gpu_freq_mhz"] == 416
+    assert d["gpu_load"] == 1.0          # 0.01 * 100
+    assert d["cpu_freq_mhz"] == 3400
+    assert d["swap_total_gb"] == 2.0     # 2147483648 / 1024^3
+    assert round(d["swap_used_gb"], 1) == 0.7

@@ -19,3 +19,7 @@ class Config:
     align: str = "left"                # left | center | right
     show_machine_info: bool = True
     show_power: bool = True
+    show_details: bool = False
+    show_swap: bool = False
+    show_uptime: bool = False
+    show_net: bool = False

@@ -10,6 +10,7 @@ import objc
 import Quartz
 
 from .config import Config
+from .extras import NetRateMeter, apply_extras
 from .metrics import read_metrics
 from .metrics.base import Metrics, format_lines
 
@@ -46,14 +47,55 @@ def machine_header_lines(machine):
     return lines
 
 
-def compose_text(machine, metrics, show_machine, show_power):
+def format_uptime(seconds):
+    if seconds is None:
+        return None
+    s = int(seconds)
+    d, rem = divmod(s, 86400)
+    h, rem = divmod(rem, 3600)
+    mnt = rem // 60
+    if d:
+        return f"{d}d {h}h"
+    if h:
+        return f"{h}h {mnt}m"
+    return f"{mnt}m"
+
+
+def format_net(down_kbps, up_kbps):
+    if down_kbps is None or up_kbps is None:
+        return None
+    if max(down_kbps, up_kbps) >= 1024:
+        return f"↓{down_kbps / 1024:.1f} ↑{up_kbps / 1024:.1f} MB/s"
+    return f"↓{down_kbps:.0f} ↑{up_kbps:.0f} KB/s"
+
+
+def format_swap(used_gb, total_gb):
+    if used_gb is None or total_gb is None:
+        return None
+    return f"{used_gb:.1f} / {total_gb:.1f} GB"
+
+
+def compose_text(machine, metrics, cfg):
     lines = []
-    if show_machine:
+    if cfg.show_machine_info:
         header = machine_header_lines(machine)
         if header:
             lines.extend(header)
             lines.append(_SEPARATOR)
-    lines.extend(format_lines(metrics, show_power))
+    for line in format_lines(metrics, cfg.show_power, cfg.show_details):
+        lines.append(line)
+        if cfg.show_swap and line.startswith("RAM"):
+            sw = format_swap(metrics.swap_used_gb, metrics.swap_total_gb)
+            if sw:
+                lines.append(f"SWAP {sw}")
+    if cfg.show_uptime:
+        up = format_uptime(metrics.uptime_seconds)
+        if up:
+            lines.append(f"UP   {up}")
+    if cfg.show_net:
+        net = format_net(metrics.net_down_kbps, metrics.net_up_kbps)
+        if net:
+            lines.append(f"NET  {net}")
     return "\n".join(lines)
 
 
@@ -153,6 +195,7 @@ class OverlayController(AppKit.NSObject):
             return None
         self.cfg = cfg
         self._machine = None
+        self._net_meter = NetRateMeter()
         self._top_left = None       # (left, top) coords Cocoa ; None => coin par defaut
         self._locked = True
         self._on_moved_cb = None
@@ -246,8 +289,8 @@ class OverlayController(AppKit.NSObject):
         layer.setCornerRadius_(0.0 if self._locked else 6.0)
 
     def _update(self):
-        text = compose_text(self._machine, read_metrics(),
-                            self.cfg.show_machine_info, self.cfg.show_power)
+        m = apply_extras(read_metrics(), self._net_meter)
+        text = compose_text(self._machine, m, self.cfg)
         astr = AppKit.NSAttributedString.alloc().initWithString_attributes_(
             text, self._attributes())
         size = astr.size()
