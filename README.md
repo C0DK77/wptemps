@@ -44,6 +44,20 @@ Réglages dans `wptemps/config.py` : intervalle, position (`top-right`,
 Si le texte est peu lisible sur un fond clair, augmenter le contraste
 (`color=(0, 0, 0)` ou `opacity=230`).
 
+## Construire l'app partageable (.app)
+```bash
+bash build.sh
+```
+Produit `dist/wptemps.app` : Python, PyObjC et `macmon` sont **embarqués** — le
+destinataire n'installe rien. Cible **Apple Silicon**.
+
+Partage : compresser `dist/wptemps.app` en `.zip` et l'envoyer (ou le déposer sur
+GitHub Releases). L'app n'étant pas signée par un compte développeur Apple, le 1er
+lancement se fait par **clic-droit → Ouvrir** (ensuite, double-clic normal). Une fois
+ouverte, le menu 🌡 propose « Lancer au démarrage ».
+
+Licences tierces : voir `THIRD_PARTY_NOTICES.md` (macmon, MIT).
+
 ## Tests
 ```bash
 .venv/bin/pytest -q
