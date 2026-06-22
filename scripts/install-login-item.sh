@@ -1,5 +1,5 @@
 #!/bin/bash
-# Installe l'overlay wptemps comme LaunchAgent (lancement a l'ouverture de session).
+# Installe l'app wptemps (barre de menus) comme LaunchAgent (lancement a l'ouverture de session).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -25,7 +25,7 @@ cat > "$PLIST" <<EOF
     <array>
         <string>$PY</string>
         <string>-m</string>
-        <string>wptemps.overlay</string>
+        <string>wptemps.app</string>
     </array>
     <key>WorkingDirectory</key>
     <string>$ROOT</string>
