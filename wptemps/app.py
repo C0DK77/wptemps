@@ -151,6 +151,10 @@ class MenuBarApp(AppKit.NSObject):
         menu.addItem_(align_item)
         self.item_machine = _make_item(menu, self, "Infos machine", b"toggleMachine:")
         self.item_power = _make_item(menu, self, "Conso (watts)", b"togglePower:")
+        self.item_details = _make_item(menu, self, "Détails CPU/GPU", b"toggleDetails:")
+        self.item_swap = _make_item(menu, self, "Swap", b"toggleSwap:")
+        self.item_uptime = _make_item(menu, self, "Uptime", b"toggleUptime:")
+        self.item_net = _make_item(menu, self, "Réseau ↓/↑", b"toggleNet:")
 
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
         _make_item(menu, self, "Quitter", b"quit:")
@@ -180,6 +184,13 @@ class MenuBarApp(AppKit.NSObject):
             self.item_power.setState_(
                 AppKit.NSControlStateValueOn if self.settings.show_power
                 else AppKit.NSControlStateValueOff)
+        if hasattr(self, "item_details"):
+            for item, flag in ((self.item_details, self.settings.show_details),
+                               (self.item_swap, self.settings.show_swap),
+                               (self.item_uptime, self.settings.show_uptime),
+                               (self.item_net, self.settings.show_net)):
+                item.setState_(AppKit.NSControlStateValueOn if flag
+                               else AppKit.NSControlStateValueOff)
 
     def toggleShow_(self, sender):
         self.state.toggle_show()
@@ -243,6 +254,22 @@ class MenuBarApp(AppKit.NSObject):
 
     def togglePower_(self, sender):
         self.settings.show_power = not self.settings.show_power
+        self._apply()
+
+    def toggleDetails_(self, sender):
+        self.settings.show_details = not self.settings.show_details
+        self._apply()
+
+    def toggleSwap_(self, sender):
+        self.settings.show_swap = not self.settings.show_swap
+        self._apply()
+
+    def toggleUptime_(self, sender):
+        self.settings.show_uptime = not self.settings.show_uptime
+        self._apply()
+
+    def toggleNet_(self, sender):
+        self.settings.show_net = not self.settings.show_net
         self._apply()
 
     def quit_(self, sender):

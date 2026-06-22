@@ -10,6 +10,7 @@ import objc
 import Quartz
 
 from .config import Config
+from .extras import NetRateMeter, apply_extras
 from .metrics import read_metrics
 from .metrics.base import Metrics, format_lines
 
@@ -194,6 +195,7 @@ class OverlayController(AppKit.NSObject):
             return None
         self.cfg = cfg
         self._machine = None
+        self._net_meter = NetRateMeter()
         self._top_left = None       # (left, top) coords Cocoa ; None => coin par defaut
         self._locked = True
         self._on_moved_cb = None
@@ -287,8 +289,8 @@ class OverlayController(AppKit.NSObject):
         layer.setCornerRadius_(0.0 if self._locked else 6.0)
 
     def _update(self):
-        text = compose_text(self._machine, read_metrics(),
-                            self.cfg.show_machine_info, self.cfg.show_power)
+        m = apply_extras(read_metrics(), self._net_meter)
+        text = compose_text(self._machine, m, self.cfg)
         astr = AppKit.NSAttributedString.alloc().initWithString_attributes_(
             text, self._attributes())
         size = astr.size()
