@@ -89,3 +89,12 @@ def test_extra_toggles_default_false_for_old_file(tmp_path):
     out = load(str(p))
     assert out.show_details is False and out.show_swap is False
     assert out.show_uptime is False and out.show_net is False
+
+
+def test_show_battery_roundtrip_and_default(tmp_path):
+    p = str(tmp_path / "s.json")
+    save(Settings(show_battery=False), p)
+    assert load(p).show_battery is False
+    old = tmp_path / "old.json"
+    old.write_text(json.dumps({"x": 1}))      # ancien fichier -> defaut True
+    assert load(str(old)).show_battery is True
