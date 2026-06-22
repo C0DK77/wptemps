@@ -13,3 +13,7 @@ class Config:
     position: str = "top-right"        # top-left | top-right | bottom-left | bottom-right
     margin: int = 40
     line_spacing: int = 10
+    font_name: str = "Menlo"
+    bold: bool = False
+    italic: bool = False
+    align: str = "left"                # left | center | right
