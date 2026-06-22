@@ -84,6 +84,14 @@ def test_config_from_settings_maps_show_flags():
     assert cfg.show_machine_info is False and cfg.show_power is False
 
 
+def test_config_from_settings_maps_extra_toggles():
+    from wptemps.app import config_from_settings
+    from wptemps.settings import Settings
+    cfg = config_from_settings(
+        Settings(show_details=True, show_swap=True, show_uptime=True, show_net=True))
+    assert cfg.show_details and cfg.show_swap and cfg.show_uptime and cfg.show_net
+
+
 def test_apply_style_applies_and_saves():
     from wptemps.app import apply_style
     from wptemps.settings import Settings

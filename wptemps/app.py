@@ -42,6 +42,8 @@ def config_from_settings(s: Settings) -> Config:
         font_size=s.font_size, opacity=s.opacity, color=tuple(s.color),
         font_name=s.font_name, bold=s.bold, italic=s.italic, align=s.align,
         show_machine_info=s.show_machine_info, show_power=s.show_power,
+        show_details=s.show_details, show_swap=s.show_swap,
+        show_uptime=s.show_uptime, show_net=s.show_net,
     )
 
 

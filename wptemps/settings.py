@@ -24,6 +24,10 @@ class Settings:
     align: str = "left"
     show_machine_info: bool = True
     show_power: bool = True
+    show_details: bool = False
+    show_swap: bool = False
+    show_uptime: bool = False
+    show_net: bool = False
 
 
 _ALIGNS = ("left", "center", "right")
@@ -49,6 +53,10 @@ def _from_dict(data) -> Settings:
         italic=bool(data.get("italic", d.italic)),
         show_machine_info=bool(data.get("show_machine_info", d.show_machine_info)),
         show_power=bool(data.get("show_power", d.show_power)),
+        show_details=bool(data.get("show_details", d.show_details)),
+        show_swap=bool(data.get("show_swap", d.show_swap)),
+        show_uptime=bool(data.get("show_uptime", d.show_uptime)),
+        show_net=bool(data.get("show_net", d.show_net)),
         align=align,
     )
 
@@ -59,6 +67,8 @@ def _to_dict(s: Settings) -> dict:
         "font_size": s.font_size, "opacity": s.opacity, "color": list(s.color),
         "font_name": s.font_name, "bold": s.bold, "italic": s.italic, "align": s.align,
         "show_machine_info": s.show_machine_info, "show_power": s.show_power,
+        "show_details": s.show_details, "show_swap": s.show_swap,
+        "show_uptime": s.show_uptime, "show_net": s.show_net,
     }
 
 

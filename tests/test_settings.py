@@ -74,3 +74,18 @@ def test_show_flags_default_true_for_old_file(tmp_path):
     p.write_text(json.dumps({"x": 1}))
     out = load(str(p))
     assert out.show_machine_info is True and out.show_power is True
+
+
+def test_extra_toggles_roundtrip(tmp_path):
+    p = str(tmp_path / "s.json")
+    save(Settings(show_details=True, show_swap=True, show_uptime=True, show_net=True), p)
+    out = load(p)
+    assert out.show_details and out.show_swap and out.show_uptime and out.show_net
+
+
+def test_extra_toggles_default_false_for_old_file(tmp_path):
+    p = tmp_path / "s.json"
+    p.write_text(json.dumps({"x": 1}))
+    out = load(str(p))
+    assert out.show_details is False and out.show_swap is False
+    assert out.show_uptime is False and out.show_net is False
