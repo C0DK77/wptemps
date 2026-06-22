@@ -40,6 +40,7 @@ def config_from_settings(s: Settings) -> Config:
     return Config(
         font_size=s.font_size, opacity=s.opacity, color=tuple(s.color),
         font_name=s.font_name, bold=s.bold, italic=s.italic, align=s.align,
+        show_machine_info=s.show_machine_info, show_power=s.show_power,
     )
 
 
