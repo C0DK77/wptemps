@@ -66,7 +66,9 @@ class NetRateMeter:
         dt = now - pt
         if dt <= 0:
             return (0.0, 0.0)
-        return ((in_bytes - pi) / dt / 1024.0, (out_bytes - po) / dt / 1024.0)
+        # max(0, ...) : un reset de compteur d'interface ne donne pas un debit negatif
+        return (max(0.0, (in_bytes - pi) / dt / 1024.0),
+                max(0.0, (out_bytes - po) / dt / 1024.0))
 
 
 def apply_extras(m, net_meter, net_reader=read_net_counters,
