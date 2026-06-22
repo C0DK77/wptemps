@@ -14,18 +14,24 @@ par-dessus le fond d'écran macOS, rafraîchies toutes les 5 s.
 .venv/bin/pip install -r requirements.txt
 ```
 
-## Lancer
+## Lancer (app barre de menus)
 ```bash
-.venv/bin/python -m wptemps.overlay
+.venv/bin/python -m wptemps.app
 ```
-Affiche le texte dans une fenêtre transparente épinglée **au niveau du bureau**
-(derrière les icônes et les fenêtres). Ton fond d'écran n'est **jamais modifié**
-et reste dynamique. Pour quitter : Ctrl-C (ou tuer le process) — rien à restaurer.
+Une icône 🌡 apparaît dans la barre de menus. Le menu permet d'afficher/masquer,
+de **déverrouiller pour déplacer** l'affichage (puis le reverrouiller), et de quitter.
+La position est mémorisée dans `~/Library/Application Support/wptemps/settings.json`.
+Ton fond d'écran n'est **jamais modifié**.
+
+Mode overlay seul (sans menu) : `.venv/bin/python -m wptemps.overlay`.
+
+> « Lancer au démarrage » depuis le menu n'est actif que pour l'app empaquetée
+> (`.app`, à venir). En mode source, utilise `scripts/install-login-item.sh`.
 
 ## Lancer automatiquement à l'ouverture de session
 ```bash
-scripts/install-login-item.sh     # installe + démarre l'overlay (LaunchAgent)
-scripts/uninstall-login-item.sh   # le retire du démarrage et l'arrête
+scripts/install-login-item.sh     # installe + démarre l'app barre de menus (LaunchAgent)
+scripts/uninstall-login-item.sh   # la retire du démarrage et l'arrête
 ```
 Le LaunchAgent force un `PATH` incluant `/opt/homebrew/bin` (requis pour trouver
 `macmon`). Logs : `/tmp/wptemps_overlay.log` et `/tmp/wptemps_overlay.err`.
