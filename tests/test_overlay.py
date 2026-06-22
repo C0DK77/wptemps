@@ -60,6 +60,12 @@ def test_lock_params_unlocked():
     assert p["bg_alpha"] > 0.0
 
 
+def test_paragraph_style_uses_clipping_no_wrap():
+    from wptemps.overlay import _make_paragraph_style
+    p = _make_paragraph_style("left", 10)
+    assert p.lineBreakMode() == AppKit.NSLineBreakByClipping
+
+
 def test_alignment_constant_maps_values():
     from wptemps.overlay import _alignment_constant
     assert _alignment_constant("left") == AppKit.NSTextAlignmentLeft

@@ -15,6 +15,7 @@ from .metrics import read_metrics
 from .metrics.base import Metrics, format_battery, format_lines
 
 _PAD = 8
+_TEXT_SLACK = 6   # marge pour l'inset interne de la cellule de texte (evite le repli)
 _UNLOCKED_BG_ALPHA = 0.25
 
 
@@ -149,6 +150,9 @@ def _make_paragraph_style(align, line_spacing):
     para = AppKit.NSMutableParagraphStyle.alloc().init()
     para.setAlignment_(_alignment_constant(align))
     para.setLineSpacing_(line_spacing)
+    # clipping : une ligne ne se replie jamais (le defaut wordWrap repliait les
+    # lignes calees pile a la largeur de la fenetre).
+    para.setLineBreakMode_(AppKit.NSLineBreakByClipping)
     return para
 
 
@@ -296,8 +300,8 @@ class OverlayController(AppKit.NSObject):
         astr = AppKit.NSAttributedString.alloc().initWithString_attributes_(
             text, self._attributes())
         size = astr.size()
-        w = int(math.ceil(size.width)) + 2 * _PAD
-        h = int(math.ceil(size.height)) + 2 * _PAD
+        w = int(math.ceil(size.width)) + 2 * _PAD + _TEXT_SLACK
+        h = int(math.ceil(size.height)) + 2 * _PAD + _TEXT_SLACK
         screen = AppKit.NSScreen.mainScreen().frame()
         if self._top_left is None:
             x, y = compute_origin(screen.size.width, screen.size.height, w, h,
