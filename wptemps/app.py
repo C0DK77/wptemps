@@ -5,7 +5,7 @@ import AppKit
 
 from . import login
 from .config import Config
-from .overlay import OverlayController
+from .overlay import OverlayController, build_font
 from .settings import Settings, load, save
 
 
@@ -43,6 +43,32 @@ def config_from_settings(s: Settings) -> Config:
     )
 
 
+def font_to_fields(font) -> dict:
+    fm = AppKit.NSFontManager.sharedFontManager()
+    tr = fm.traitsOfFont_(font)
+    return {
+        "font_name": font.familyName(),
+        "font_size": int(round(font.pointSize())),
+        "bold": bool(tr & AppKit.NSBoldFontMask),
+        "italic": bool(tr & AppKit.NSItalicFontMask),
+    }
+
+
+def color_to_fields(color) -> dict:
+    c = color.colorUsingColorSpace_(AppKit.NSColorSpace.sRGBColorSpace()) or color
+    return {
+        "color": (int(round(c.redComponent() * 255)),
+                  int(round(c.greenComponent() * 255)),
+                  int(round(c.blueComponent() * 255))),
+        "opacity": int(round(c.alphaComponent() * 255)),
+    }
+
+
+def apply_style(settings, set_config_fn, save_fn) -> None:
+    set_config_fn(config_from_settings(settings))
+    save_fn(settings)
+
+
 def login_supported() -> bool:
     # Le lancement au demarrage via SMAppService ne s'applique qu'a l'app empaquetee.
     return login.available()
@@ -74,6 +100,14 @@ class MenuBarApp(AppKit.NSObject):
         self.controller.start()                       # rend une fois a la bonne position
         self.controller.set_visible(self.settings.show)  # puis montre (ou non) sans flash
 
+        # panneaux natifs police/couleur -> callbacks via cible/action
+        AppKit.NSFontManager.sharedFontManager().setTarget_(self)
+        AppKit.NSFontManager.sharedFontManager().setAction_(b"changeFont:")
+        cp = AppKit.NSColorPanel.sharedColorPanel()
+        cp.setTarget_(self)
+        cp.setAction_(b"changeColor:")
+        cp.setShowsAlpha_(True)
+
         self._build_status_item()
         return self
 
@@ -97,6 +131,20 @@ class MenuBarApp(AppKit.NSObject):
             self.item_login.setEnabled_(False)
             self.item_login.setToolTip_("Disponible uniquement dans l'app empaquetee (.app)")
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
+        _make_item(menu, self, "Police…", b"openFont:")
+        _make_item(menu, self, "Couleur…", b"openColor:")
+        align_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+            "Alignement", None, "")
+        align_menu = AppKit.NSMenu.alloc().init()
+        self.align_items = {}
+        for key, label in (("left", "Gauche"), ("center", "Centre"), ("right", "Droite")):
+            it = _make_item(align_menu, self, label, b"setAlign:")
+            it.setRepresentedObject_(key)
+            self.align_items[key] = it
+        align_item.setSubmenu_(align_menu)
+        menu.addItem_(align_item)
+
+        menu.addItem_(AppKit.NSMenuItem.separatorItem())
         _make_item(menu, self, "Quitter", b"quit:")
         self.status_item.setMenu_(menu)
         self._refresh_checks()
@@ -112,6 +160,11 @@ class MenuBarApp(AppKit.NSObject):
             self.item_login.setState_(
                 AppKit.NSControlStateValueOn if login.is_enabled()
                 else AppKit.NSControlStateValueOff)
+        if hasattr(self, "align_items"):
+            for key, item in self.align_items.items():
+                item.setState_(
+                    AppKit.NSControlStateValueOn if self.settings.align == key
+                    else AppKit.NSControlStateValueOff)
 
     def toggleShow_(self, sender):
         self.state.toggle_show()
@@ -124,6 +177,50 @@ class MenuBarApp(AppKit.NSObject):
     def toggleLogin_(self, sender):
         login.set_enabled(not login.is_enabled())
         self._refresh_checks()
+
+    def _apply(self):
+        apply_style(self.settings,
+                    set_config_fn=self.controller.set_config,
+                    save_fn=save)
+        self._refresh_checks()
+
+    def openFont_(self, sender):
+        AppKit.NSApp.activateIgnoringOtherApps_(True)
+        fm = AppKit.NSFontManager.sharedFontManager()
+        cur = build_font(self.settings.font_name, self.settings.font_size,
+                         self.settings.bold, self.settings.italic)
+        fm.setSelectedFont_isMultiple_(cur, False)
+        fm.orderFrontFontPanel_(self)
+
+    def changeFont_(self, sender):
+        fm = AppKit.NSFontManager.sharedFontManager()
+        cur = build_font(self.settings.font_name, self.settings.font_size,
+                         self.settings.bold, self.settings.italic)
+        new = fm.convertFont_(cur)
+        f = font_to_fields(new)
+        self.settings.font_name = f["font_name"]
+        self.settings.font_size = f["font_size"]
+        self.settings.bold = f["bold"]
+        self.settings.italic = f["italic"]
+        self._apply()
+
+    def openColor_(self, sender):
+        AppKit.NSApp.activateIgnoringOtherApps_(True)
+        cp = AppKit.NSColorPanel.sharedColorPanel()
+        r, g, b = self.settings.color
+        cp.setColor_(AppKit.NSColor.colorWithSRGBRed_green_blue_alpha_(
+            r / 255.0, g / 255.0, b / 255.0, self.settings.opacity / 255.0))
+        cp.orderFront_(self)
+
+    def changeColor_(self, sender):
+        f = color_to_fields(AppKit.NSColorPanel.sharedColorPanel().color())
+        self.settings.color = f["color"]
+        self.settings.opacity = f["opacity"]
+        self._apply()
+
+    def setAlign_(self, sender):
+        self.settings.align = sender.representedObject()
+        self._apply()
 
     def quit_(self, sender):
         AppKit.NSApp.terminate_(self)
