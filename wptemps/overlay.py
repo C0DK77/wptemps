@@ -146,7 +146,8 @@ class OverlayController(AppKit.NSObject):
         label.setSelectable_(False)
         label.cell().setWraps_(False)
         view.addSubview_(label)
-        win.orderFront_(None)
+        # pas d'orderFront ici : la fenetre n'est montree qu'apres positionnement
+        # (via set_visible), pour eviter un flash au coin par defaut au lancement.
         self.window = win
         self.label = label
 
@@ -160,8 +161,8 @@ class OverlayController(AppKit.NSObject):
             self._on_moved_cb(self._top_left[0], self._top_left[1])
 
     def set_position(self, left, top):
+        # stocke seulement l'ancre ; le rendu se fait au prochain _update (start()).
         self._top_left = None if (left is None or top is None) else (left, top)
-        self._update()
 
     def set_visible(self, visible):
         if visible:
@@ -213,6 +214,7 @@ def main() -> None:
     app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyAccessory)
     controller = OverlayController.alloc().initWithConfig_(cfg)
     controller.start()
+    controller.set_visible(True)
     print("[wptemps] overlay demarre (mode autonome).")
     app.run()
 

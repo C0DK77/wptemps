@@ -69,8 +69,8 @@ class MenuBarApp(AppKit.NSObject):
         if self.settings.x is not None and self.settings.y is not None:
             self.controller.set_position(self.settings.x, self.settings.y)
         self.controller.set_locked(self.settings.locked)
-        self.controller.set_visible(self.settings.show)
-        self.controller.start()
+        self.controller.start()                       # rend une fois a la bonne position
+        self.controller.set_visible(self.settings.show)  # puis montre (ou non) sans flash
 
         self._build_status_item()
         return self

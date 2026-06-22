@@ -44,8 +44,8 @@ Ce qui évolue / est nouveau :
 - Emplacement : `~/Library/Application Support/wptemps/settings.json`.
 - Contenu : `{"x": float|null, "y": float|null, "locked": bool, "show": bool,
   "font_size": int, "opacity": int, "color": [r,g,b]}`.
-  `x`/`y` = origine (coords Cocoa, bas-gauche) de la fenêtre ; `null` = pas encore déplacé
-  → on retombe sur le coin par défaut (`top-right`, marge config).
+  `x`/`y` = coin **haut-gauche** de la fenêtre (coords Cocoa, origine écran bas-gauche) ;
+  `null` = pas encore déplacé → on retombe sur le coin par défaut (`top-right`, marge config).
 - Interface :
   - `load() -> Settings` (dataclass) — si fichier absent/corrompu → valeurs par défaut, sans crash.
   - `save(s: Settings) -> None` — crée le dossier si besoin, écrit le JSON.
