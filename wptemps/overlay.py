@@ -45,10 +45,29 @@ def lock_params(locked, desktop_level):
             "draggable": True, "bg_alpha": _UNLOCKED_BG_ALPHA}
 
 
-def _make_paragraph_style(position, line_spacing):
+def _alignment_constant(align):
+    return {
+        "left": AppKit.NSTextAlignmentLeft,
+        "center": AppKit.NSTextAlignmentCenter,
+        "right": AppKit.NSTextAlignmentRight,
+    }.get(align, AppKit.NSTextAlignmentLeft)
+
+
+def build_font(name, size, bold, italic):
+    fm = AppKit.NSFontManager.sharedFontManager()
+    font = (AppKit.NSFont.fontWithName_size_(name, size)
+            or AppKit.NSFont.monospacedSystemFontOfSize_weight_(
+                size, AppKit.NSFontWeightRegular))
+    if bold:
+        font = fm.convertFont_toHaveTrait_(font, AppKit.NSBoldFontMask)
+    if italic:
+        font = fm.convertFont_toHaveTrait_(font, AppKit.NSItalicFontMask)
+    return font
+
+
+def _make_paragraph_style(align, line_spacing):
     para = AppKit.NSMutableParagraphStyle.alloc().init()
-    para.setAlignment_(AppKit.NSTextAlignmentRight if position.endswith("right")
-                       else AppKit.NSTextAlignmentLeft)
+    para.setAlignment_(_alignment_constant(align))
     para.setLineSpacing_(line_spacing)
     return para
 
@@ -111,9 +130,8 @@ class OverlayController(AppKit.NSObject):
             r / 255.0, g / 255.0, b / 255.0, self.cfg.opacity / 255.0)
 
     def _attributes(self):
-        font = (AppKit.NSFont.fontWithName_size_("Menlo", self.cfg.font_size)
-                or AppKit.NSFont.monospacedSystemFontOfSize_weight_(
-                    self.cfg.font_size, AppKit.NSFontWeightRegular))
+        font = build_font(self.cfg.font_name, self.cfg.font_size,
+                          self.cfg.bold, self.cfg.italic)
         shadow = AppKit.NSShadow.alloc().init()
         shadow.setShadowColor_(AppKit.NSColor.blackColor().colorWithAlphaComponent_(0.6))
         shadow.setShadowBlurRadius_(2.0)
@@ -123,7 +141,7 @@ class OverlayController(AppKit.NSObject):
             AppKit.NSForegroundColorAttributeName: self._color(),
             AppKit.NSShadowAttributeName: shadow,
             AppKit.NSParagraphStyleAttributeName: _make_paragraph_style(
-                self.cfg.position, self.cfg.line_spacing),
+                self.cfg.align, self.cfg.line_spacing),
         }
 
     def _build_window(self):
@@ -163,6 +181,10 @@ class OverlayController(AppKit.NSObject):
     def set_position(self, left, top):
         # stocke seulement l'ancre ; le rendu se fait au prochain _update (start()).
         self._top_left = None if (left is None or top is None) else (left, top)
+
+    def set_config(self, cfg):
+        self.cfg = cfg
+        self._update()
 
     def set_visible(self, visible):
         if visible:

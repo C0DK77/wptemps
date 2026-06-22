@@ -66,3 +66,26 @@ def test_lock_params_unlocked():
     assert p["ignores_mouse"] is False
     assert p["draggable"] is True
     assert p["bg_alpha"] > 0.0
+
+
+def test_alignment_constant_maps_values():
+    from wptemps.overlay import _alignment_constant
+    assert _alignment_constant("left") == AppKit.NSTextAlignmentLeft
+    assert _alignment_constant("center") == AppKit.NSTextAlignmentCenter
+    assert _alignment_constant("right") == AppKit.NSTextAlignmentRight
+    assert _alignment_constant("nope") == AppKit.NSTextAlignmentLeft
+
+
+def test_build_font_applies_traits():
+    from wptemps.overlay import build_font
+    fm = AppKit.NSFontManager.sharedFontManager()
+    f = build_font("Menlo", 20, bold=True, italic=False)
+    assert bool(fm.traitsOfFont_(f) & AppKit.NSBoldFontMask)
+    assert round(f.pointSize()) == 20
+
+
+def test_build_font_falls_back_for_unknown_family():
+    from wptemps.overlay import build_font
+    f = build_font("NoSuchFontFamily__xyz", 18, bold=False, italic=False)
+    assert f is not None
+    assert round(f.pointSize()) == 18
