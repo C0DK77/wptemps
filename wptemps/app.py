@@ -101,8 +101,9 @@ class MenuBarApp(AppKit.NSObject):
         self.controller.set_visible(self.settings.show)  # puis montre (ou non) sans flash
 
         # panneaux natifs police/couleur -> callbacks via cible/action
-        AppKit.NSFontManager.sharedFontManager().setTarget_(self)
-        AppKit.NSFontManager.sharedFontManager().setAction_(b"changeFont:")
+        fm = AppKit.NSFontManager.sharedFontManager()
+        fm.setTarget_(self)
+        fm.setAction_(b"changeFont:")
         cp = AppKit.NSColorPanel.sharedColorPanel()
         cp.setTarget_(self)
         cp.setAction_(b"changeColor:")
