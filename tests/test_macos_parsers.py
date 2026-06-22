@@ -31,3 +31,12 @@ def test_parse_battery_pct():
 
 def test_parse_battery_pct_absent():
     assert parse_battery_pct("Now drawing from 'AC Power'") is None
+
+
+def test_metrics_from_macmon_extracts_power():
+    sample = dict(SAMPLE)
+    sample["cpu_power"] = 4.25
+    sample["gpu_power"] = 0.12
+    d = metrics_from_macmon(sample)
+    assert d["cpu_power"] == 4.25
+    assert d["gpu_power"] == 0.12

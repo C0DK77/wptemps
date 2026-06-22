@@ -29,6 +29,8 @@ def metrics_from_macmon(sample: dict) -> dict:
         "cpu_load": _frac_to_pct(sample.get("cpu_usage_pct")),
         "ram_used_gb": _bytes_to_gb(mem.get("ram_usage")),
         "ram_total_gb": _bytes_to_gb(mem.get("ram_total")),
+        "cpu_power": sample.get("cpu_power"),
+        "gpu_power": sample.get("gpu_power"),
     }
 
 

@@ -25,3 +25,21 @@ def test_format_lines_handles_missing():
 def test_format_lines_includes_fan_when_present():
     lines = format_lines(Metrics(fan_rpm=2400.0))
     assert any(l == "FAN  2400 rpm" for l in lines)
+
+
+def test_format_lines_show_power_appends_watts():
+    m = Metrics(cpu_temp=55.0, cpu_load=10.0, gpu_temp=48.0,
+                cpu_power=4.2, gpu_power=0.1)
+    lines = format_lines(m, show_power=True)
+    assert lines[0] == "CPU  55°C  10%  4.2W"
+    assert lines[1] == "GPU  48°C  0.1W"
+
+
+def test_format_lines_default_has_no_watts():
+    m = Metrics(cpu_temp=55.0, cpu_load=10.0, cpu_power=4.2)
+    assert format_lines(m)[0] == "CPU  55°C  10%"   # defaut inchange
+
+
+def test_format_lines_show_power_omits_missing_watt():
+    m = Metrics(cpu_temp=55.0, cpu_load=10.0, cpu_power=None)
+    assert format_lines(m, show_power=True)[0] == "CPU  55°C  10%"
