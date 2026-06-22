@@ -17,10 +17,6 @@ _PAD = 8
 _UNLOCKED_BG_ALPHA = 0.25
 
 
-def overlay_text(m: Metrics) -> str:
-    return "\n".join(format_lines(m))
-
-
 _SEPARATOR = "────────────"
 
 

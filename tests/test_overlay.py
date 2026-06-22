@@ -1,15 +1,7 @@
 import AppKit
 import Quartz
 
-from wptemps.metrics.base import Metrics
-from wptemps.overlay import compute_origin, lock_params, overlay_text, place_top_left
-
-
-def test_overlay_text_joins_lines():
-    t = overlay_text(Metrics(cpu_temp=55.0, gpu_temp=48.0))
-    assert "CPU  55°C" in t
-    assert "GPU  48°C" in t
-    assert "\n" in t
+from wptemps.overlay import compute_origin, lock_params, place_top_left
 
 
 def test_compute_origin_top_right():
