@@ -1,10 +1,9 @@
 """App wptemps : icone de barre de menus pilotant l'overlay deplacable."""
 from __future__ import annotations
 
-import sys
-
 import AppKit
 
+from . import login
 from .config import Config
 from .overlay import OverlayController
 from .settings import Settings, load, save
@@ -43,7 +42,7 @@ def config_from_settings(s: Settings) -> Config:
 
 def login_supported() -> bool:
     # Le lancement au demarrage via SMAppService ne s'applique qu'a l'app empaquetee.
-    return bool(getattr(sys, "frozen", False))
+    return login.available()
 
 
 def _make_item(menu, target, title, selector):
@@ -106,6 +105,10 @@ class MenuBarApp(AppKit.NSObject):
         self.item_lock.setTitle_(
             "Verrouiller la position" if not self.settings.locked
             else "Deverrouiller pour deplacer")
+        if login_supported():
+            self.item_login.setState_(
+                AppKit.NSControlStateValueOn if login.is_enabled()
+                else AppKit.NSControlStateValueOff)
 
     def toggleShow_(self, sender):
         self.state.toggle_show()
@@ -116,7 +119,8 @@ class MenuBarApp(AppKit.NSObject):
         self._refresh_checks()
 
     def toggleLogin_(self, sender):
-        pass  # active en Phase B (app empaquetee)
+        login.set_enabled(not login.is_enabled())
+        self._refresh_checks()
 
     def quit_(self, sender):
         AppKit.NSApp.terminate_(self)
