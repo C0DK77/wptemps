@@ -15,6 +15,8 @@ def available() -> bool:
 
 
 def is_enabled() -> bool:
+    if not available():
+        return False
     try:
         import ServiceManagement as SM
         return SM.SMAppService.mainAppService().status() == SM.SMAppServiceStatusEnabled
@@ -23,6 +25,10 @@ def is_enabled() -> bool:
 
 
 def set_enabled(enabled: bool) -> bool:
+    # gate sur available() : aucun appel SMAppService hors app empaquetee
+    # (evite d'enregistrer par erreur un element de connexion depuis les sources).
+    if not available():
+        return False
     try:
         import ServiceManagement as SM
         svc = SM.SMAppService.mainAppService()

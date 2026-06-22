@@ -18,6 +18,8 @@ setup(
             "NSHumanReadableCopyright": "wptemps — voir THIRD_PARTY_NOTICES.md",
         },
         "packages": ["wptemps"],
+        # import lazy dans login.py -> py2app ne le decouvre pas seul
+        "includes": ["ServiceManagement"],
         "resources": [MACMON, "THIRD_PARTY_NOTICES.md"],
     }},
     setup_requires=["py2app"],

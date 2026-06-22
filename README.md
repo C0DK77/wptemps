@@ -26,7 +26,8 @@ Ton fond d'écran n'est **jamais modifié**.
 Mode overlay seul (sans menu) : `.venv/bin/python -m wptemps.overlay`.
 
 > « Lancer au démarrage » depuis le menu n'est actif que pour l'app empaquetée
-> (`.app`, à venir). En mode source, utilise `scripts/install-login-item.sh`.
+> (voir « Construire l'app partageable » plus bas). En mode source, utilise
+> `scripts/install-login-item.sh`.
 
 ## Lancer automatiquement à l'ouverture de session
 ```bash
