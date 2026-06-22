@@ -46,3 +46,13 @@ def test_config_from_settings_maps_fields():
 def test_login_supported_is_false_from_source():
     # lance depuis les sources (non empaquete) -> non supporte
     assert login_supported() is False
+
+
+def test_config_from_settings_maps_style_fields():
+    from wptemps.app import config_from_settings
+    from wptemps.settings import Settings
+    cfg = config_from_settings(
+        Settings(font_name="Courier New", bold=True, italic=True, align="right"))
+    assert cfg.font_name == "Courier New"
+    assert cfg.bold is True and cfg.italic is True
+    assert cfg.align == "right"

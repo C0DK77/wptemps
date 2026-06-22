@@ -36,3 +36,27 @@ def test_save_creates_directory(tmp_path):
     p = str(tmp_path / "sub" / "dir" / "settings.json")
     save(Settings(), p)
     assert load(p) == Settings()
+
+
+def test_new_style_fields_roundtrip(tmp_path):
+    p = str(tmp_path / "s.json")
+    s = Settings(font_name="Courier New", bold=True, italic=True, align="center")
+    save(s, p)
+    out = load(p)
+    assert out.font_name == "Courier New"
+    assert out.bold is True and out.italic is True
+    assert out.align == "center"
+
+
+def test_align_invalid_normalized_to_left(tmp_path):
+    p = tmp_path / "s.json"
+    p.write_text(json.dumps({"align": "diagonal"}))
+    assert load(str(p)).align == "left"
+
+
+def test_old_settings_without_style_fields_uses_defaults(tmp_path):
+    p = tmp_path / "s.json"
+    p.write_text(json.dumps({"x": 10, "y": 20}))   # ancien fichier
+    out = load(str(p))
+    assert out.font_name == Settings().font_name
+    assert out.bold is False and out.align == "left"

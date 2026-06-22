@@ -18,12 +18,22 @@ class Settings:
     font_size: int = 28
     opacity: int = 190
     color: Tuple[int, int, int] = (255, 255, 255)
+    font_name: str = "Menlo"
+    bold: bool = False
+    italic: bool = False
+    align: str = "left"
+
+
+_ALIGNS = ("left", "center", "right")
 
 
 def _from_dict(data) -> Settings:
     d = Settings()
     if not isinstance(data, dict):
         return d
+    align = data.get("align", d.align)
+    if align not in _ALIGNS:
+        align = "left"
     return Settings(
         x=data.get("x", d.x),
         y=data.get("y", d.y),
@@ -32,6 +42,10 @@ def _from_dict(data) -> Settings:
         font_size=int(data.get("font_size", d.font_size)),
         opacity=int(data.get("opacity", d.opacity)),
         color=tuple(data.get("color", d.color)),
+        font_name=str(data.get("font_name", d.font_name)),
+        bold=bool(data.get("bold", d.bold)),
+        italic=bool(data.get("italic", d.italic)),
+        align=align,
     )
 
 
@@ -39,6 +53,7 @@ def _to_dict(s: Settings) -> dict:
     return {
         "x": s.x, "y": s.y, "locked": s.locked, "show": s.show,
         "font_size": s.font_size, "opacity": s.opacity, "color": list(s.color),
+        "font_name": s.font_name, "bold": s.bold, "italic": s.italic, "align": s.align,
     }
 
 
