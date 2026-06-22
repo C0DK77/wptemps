@@ -30,6 +30,16 @@ Remplace le fond d'écran par une image (wallpaper + texte incrusté), rafraîch
 en boucle. Ctrl-C restaure le fond d'origine. Limite : le fond devient une image
 fixe à la résolution de la source ; préférer le mode overlay.
 
+## Lancer automatiquement à l'ouverture de session
+```bash
+scripts/install-login-item.sh     # installe + démarre l'overlay (LaunchAgent)
+scripts/uninstall-login-item.sh   # le retire du démarrage et l'arrête
+```
+Le LaunchAgent force un `PATH` incluant `/opt/homebrew/bin` (requis pour trouver
+`macmon`). Logs : `/tmp/wptemps_overlay.log` et `/tmp/wptemps_overlay.err`.
+`KeepAlive` est activé : l'overlay est relancé automatiquement s'il s'arrête
+(utilise le script de désinstallation pour l'arrêter pour de bon).
+
 ## Configuration
 Réglages dans `wptemps/config.py` : intervalle, position (`top-right`,
 `top-left`, `bottom-left`, `bottom-right`), couleur, opacité, taille de police.
