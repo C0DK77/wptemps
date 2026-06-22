@@ -29,3 +29,37 @@ def metrics_from_macmon(sample: dict) -> dict:
 def parse_battery_pct(pmset_output: str) -> Optional[float]:
     m = re.search(r"(\d+)%", pmset_output)
     return float(m.group(1)) if m else None
+
+
+import json
+import subprocess
+
+
+def _macmon_one_sample() -> str:
+    out = subprocess.run(
+        ["macmon", "pipe", "-s", "1", "-i", "200"],
+        capture_output=True, text=True, timeout=10, check=True,
+    )
+    return out.stdout.strip().splitlines()[-1]
+
+
+def _pmset_battery() -> str:
+    out = subprocess.run(
+        ["pmset", "-g", "batt"],
+        capture_output=True, text=True, timeout=5, check=True,
+    )
+    return out.stdout
+
+
+def read_metrics(sampler=_macmon_one_sample, battery_reader=_pmset_battery) -> "Metrics":
+    from .base import Metrics
+    fields = {}
+    try:
+        fields.update(metrics_from_macmon(json.loads(sampler())))
+    except Exception:
+        pass
+    try:
+        fields["battery_pct"] = parse_battery_pct(battery_reader())
+    except Exception:
+        pass
+    return Metrics(**fields)
