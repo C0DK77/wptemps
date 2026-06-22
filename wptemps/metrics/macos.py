@@ -1,0 +1,31 @@
+from __future__ import annotations
+
+import re
+from typing import Optional
+
+_GB = 1024 ** 3
+
+
+def _bytes_to_gb(v: Optional[float]) -> Optional[float]:
+    return round(v / _GB, 1) if v is not None else None
+
+
+def _frac_to_pct(v: Optional[float]) -> Optional[float]:
+    return round(v * 100, 1) if v is not None else None
+
+
+def metrics_from_macmon(sample: dict) -> dict:
+    temp = sample.get("temp") or {}
+    mem = sample.get("memory") or {}
+    return {
+        "cpu_temp": temp.get("cpu_temp_avg"),
+        "gpu_temp": temp.get("gpu_temp_avg"),
+        "cpu_load": _frac_to_pct(sample.get("cpu_usage_pct")),
+        "ram_used_gb": _bytes_to_gb(mem.get("ram_usage")),
+        "ram_total_gb": _bytes_to_gb(mem.get("ram_total")),
+    }
+
+
+def parse_battery_pct(pmset_output: str) -> Optional[float]:
+    m = re.search(r"(\d+)%", pmset_output)
+    return float(m.group(1)) if m else None
