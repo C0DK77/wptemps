@@ -166,6 +166,18 @@ def test_compose_text_inserts_swap_uptime_net():
     assert lines.index("SWAP 0.7 / 2.0 GB") == lines.index("RAM  9.0 / 16.0 GB") + 1
 
 
+def test_compose_text_battery_toggle():
+    from wptemps.overlay import compose_text
+    from wptemps.config import Config
+    from wptemps.metrics.base import Metrics
+    from wptemps.sysinfo import MachineInfo
+    m = Metrics(cpu_temp=55.0, battery_pct=87.0)
+    on = compose_text(MachineInfo(), m, Config(show_machine_info=False, show_battery=True))
+    off = compose_text(MachineInfo(), m, Config(show_machine_info=False, show_battery=False))
+    assert any(l == "BAT  87%" for l in on.split("\n"))
+    assert "BAT" not in off
+
+
 def test_compose_text_details_on_gpu_line():
     from wptemps.overlay import compose_text
     from wptemps.config import Config

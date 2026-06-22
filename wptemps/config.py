@@ -23,3 +23,4 @@ class Config:
     show_swap: bool = False
     show_uptime: bool = False
     show_net: bool = False
+    show_battery: bool = True

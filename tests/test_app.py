@@ -92,6 +92,12 @@ def test_config_from_settings_maps_extra_toggles():
     assert cfg.show_details and cfg.show_swap and cfg.show_uptime and cfg.show_net
 
 
+def test_config_from_settings_maps_battery():
+    from wptemps.app import config_from_settings
+    from wptemps.settings import Settings
+    assert config_from_settings(Settings(show_battery=False)).show_battery is False
+
+
 def test_apply_style_applies_and_saves():
     from wptemps.app import apply_style
     from wptemps.settings import Settings

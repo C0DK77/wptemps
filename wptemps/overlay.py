@@ -12,7 +12,7 @@ import Quartz
 from .config import Config
 from .extras import NetRateMeter, apply_extras
 from .metrics import read_metrics
-from .metrics.base import Metrics, format_lines
+from .metrics.base import Metrics, format_battery, format_lines
 
 _PAD = 8
 _UNLOCKED_BG_ALPHA = 0.25
@@ -88,6 +88,8 @@ def compose_text(machine, metrics, cfg):
             sw = format_swap(metrics.swap_used_gb, metrics.swap_total_gb)
             if sw:
                 lines.append(f"SWAP {sw}")
+    if cfg.show_battery:
+        lines.append(format_battery(metrics.battery_pct))
     if cfg.show_uptime:
         up = format_uptime(metrics.uptime_seconds)
         if up:

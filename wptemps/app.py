@@ -44,6 +44,7 @@ def config_from_settings(s: Settings) -> Config:
         show_machine_info=s.show_machine_info, show_power=s.show_power,
         show_details=s.show_details, show_swap=s.show_swap,
         show_uptime=s.show_uptime, show_net=s.show_net,
+        show_battery=s.show_battery,
     )
 
 
@@ -143,6 +144,7 @@ class MenuBarApp(AppKit.NSObject):
         self.item_swap = _make_item(display_menu, self, "Swap", b"toggleSwap:")
         self.item_uptime = _make_item(display_menu, self, "Uptime", b"toggleUptime:")
         self.item_net = _make_item(display_menu, self, "Réseau ↓/↑", b"toggleNet:")
+        self.item_battery = _make_item(display_menu, self, "Batterie", b"toggleBattery:")
         display_item.setSubmenu_(display_menu)
         menu.addItem_(display_item)
 
@@ -202,7 +204,8 @@ class MenuBarApp(AppKit.NSObject):
             for item, flag in ((self.item_details, self.settings.show_details),
                                (self.item_swap, self.settings.show_swap),
                                (self.item_uptime, self.settings.show_uptime),
-                               (self.item_net, self.settings.show_net)):
+                               (self.item_net, self.settings.show_net),
+                               (self.item_battery, self.settings.show_battery)):
                 item.setState_(AppKit.NSControlStateValueOn if flag
                                else AppKit.NSControlStateValueOff)
 
@@ -284,6 +287,10 @@ class MenuBarApp(AppKit.NSObject):
 
     def toggleNet_(self, sender):
         self.settings.show_net = not self.settings.show_net
+        self._apply()
+
+    def toggleBattery_(self, sender):
+        self.settings.show_battery = not self.settings.show_battery
         self._apply()
 
     def quit_(self, sender):

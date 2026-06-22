@@ -1,4 +1,4 @@
-from wptemps.metrics.base import Metrics, format_lines
+from wptemps.metrics.base import Metrics, format_battery, format_lines
 
 
 def test_format_lines_all_values():
@@ -10,8 +10,8 @@ def test_format_lines_all_values():
     assert lines[0] == "CPU  55°C  12%"
     assert lines[1] == "GPU  48°C"
     assert lines[2] == "RAM  11.2 / 17.2 GB"
-    assert lines[3] == "BAT  87%"
-    assert all("FAN" not in l for l in lines)  # pas de ventilo -> ligne omise
+    assert all("BAT" not in l for l in lines)   # batterie geree par compose_text (bascule)
+    assert all("FAN" not in l for l in lines)   # pas de ventilo -> ligne omise
 
 
 def test_format_lines_handles_missing():
@@ -19,7 +19,12 @@ def test_format_lines_handles_missing():
     assert lines[0] == "CPU  N/A  N/A"
     assert lines[1] == "GPU  N/A"
     assert lines[2] == "RAM  N/A"
-    assert lines[3] == "BAT  N/A"
+    assert all("BAT" not in l for l in lines)
+
+
+def test_format_battery():
+    assert format_battery(87.0) == "BAT  87%"
+    assert format_battery(None) == "BAT  N/A"
 
 
 def test_format_lines_includes_fan_when_present():

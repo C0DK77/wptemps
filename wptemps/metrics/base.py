@@ -45,6 +45,10 @@ def _freq(mhz: Optional[float]) -> str:
     return f"  {mhz:.0f}MHz"
 
 
+def format_battery(pct: Optional[float]) -> str:
+    return f"BAT  {_pct(pct)}"
+
+
 def format_lines(m: Metrics, show_power: bool = False, show_details: bool = False) -> list[str]:
     cpu = f"CPU  {_temp(m.cpu_temp)}  {_pct(m.cpu_load)}"
     gpu = f"GPU  {_temp(m.gpu_temp)}"
@@ -61,7 +65,6 @@ def format_lines(m: Metrics, show_power: bool = False, show_details: bool = Fals
         lines.append(f"RAM  {m.ram_used_gb:.1f} / {m.ram_total_gb:.1f} GB")
     else:
         lines.append("RAM  N/A")
-    lines.append(f"BAT  {_pct(m.battery_pct)}")
     if m.fan_rpm is not None:
         lines.append(f"FAN  {m.fan_rpm:.0f} rpm")
     return lines
