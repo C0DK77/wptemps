@@ -60,3 +60,17 @@ def test_old_settings_without_style_fields_uses_defaults(tmp_path):
     out = load(str(p))
     assert out.font_name == Settings().font_name
     assert out.bold is False and out.align == "left"
+
+
+def test_show_flags_roundtrip(tmp_path):
+    p = str(tmp_path / "s.json")
+    save(Settings(show_machine_info=False, show_power=False), p)
+    out = load(p)
+    assert out.show_machine_info is False and out.show_power is False
+
+
+def test_show_flags_default_true_for_old_file(tmp_path):
+    p = tmp_path / "s.json"
+    p.write_text(json.dumps({"x": 1}))
+    out = load(str(p))
+    assert out.show_machine_info is True and out.show_power is True

@@ -22,6 +22,8 @@ class Settings:
     bold: bool = False
     italic: bool = False
     align: str = "left"
+    show_machine_info: bool = True
+    show_power: bool = True
 
 
 _ALIGNS = ("left", "center", "right")
@@ -45,6 +47,8 @@ def _from_dict(data) -> Settings:
         font_name=str(data.get("font_name", d.font_name)),
         bold=bool(data.get("bold", d.bold)),
         italic=bool(data.get("italic", d.italic)),
+        show_machine_info=bool(data.get("show_machine_info", d.show_machine_info)),
+        show_power=bool(data.get("show_power", d.show_power)),
         align=align,
     )
 
@@ -54,6 +58,7 @@ def _to_dict(s: Settings) -> dict:
         "x": s.x, "y": s.y, "locked": s.locked, "show": s.show,
         "font_size": s.font_size, "opacity": s.opacity, "color": list(s.color),
         "font_name": s.font_name, "bold": s.bold, "italic": s.italic, "align": s.align,
+        "show_machine_info": s.show_machine_info, "show_power": s.show_power,
     }
 
 

@@ -17,3 +17,5 @@ class Config:
     bold: bool = False
     italic: bool = False
     align: str = "left"                # left | center | right
+    show_machine_info: bool = True
+    show_power: bool = True

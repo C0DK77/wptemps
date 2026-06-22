@@ -77,6 +77,13 @@ def test_color_to_fields_extracts_rgb_and_opacity():
     assert f["opacity"] == 128   # round(0.5*255)
 
 
+def test_config_from_settings_maps_show_flags():
+    from wptemps.app import config_from_settings
+    from wptemps.settings import Settings
+    cfg = config_from_settings(Settings(show_machine_info=False, show_power=False))
+    assert cfg.show_machine_info is False and cfg.show_power is False
+
+
 def test_apply_style_applies_and_saves():
     from wptemps.app import apply_style
     from wptemps.settings import Settings

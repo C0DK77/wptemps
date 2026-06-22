@@ -17,8 +17,44 @@ _PAD = 8
 _UNLOCKED_BG_ALPHA = 0.25
 
 
-def overlay_text(m: Metrics) -> str:
-    return "\n".join(format_lines(m))
+_SEPARATOR = "────────────"
+
+
+def machine_header_lines(machine):
+    lines = []
+    if machine is None:
+        return lines
+    if machine.os_version:
+        lines.append(f"macOS {machine.os_version}")
+    mc = " · ".join(x for x in (machine.model_name, machine.chip) if x)
+    if mc:
+        lines.append(mc)
+    seg = []
+    if machine.cpu_cores:
+        if machine.cpu_p and machine.cpu_e:
+            seg.append(f"CPU {machine.cpu_cores}c ({machine.cpu_p}P+{machine.cpu_e}E)")
+        else:
+            seg.append(f"CPU {machine.cpu_cores}c")
+    if machine.gpu_cores:
+        seg.append(f"GPU {machine.gpu_cores}c")
+    if machine.ram_gb:
+        seg.append(f"{machine.ram_gb} GB")
+    if seg:
+        lines.append(" · ".join(seg))
+    if machine.disk_total_gb is not None and machine.disk_free_gb is not None:
+        lines.append(f"Disk {machine.disk_free_gb:.0f}/{machine.disk_total_gb:.0f} GB free")
+    return lines
+
+
+def compose_text(machine, metrics, show_machine, show_power):
+    lines = []
+    if show_machine:
+        header = machine_header_lines(machine)
+        if header:
+            lines.extend(header)
+            lines.append(_SEPARATOR)
+    lines.extend(format_lines(metrics, show_power))
+    return "\n".join(lines)
 
 
 def compute_origin(screen_w, screen_h, win_w, win_h, position, margin):
@@ -116,6 +152,7 @@ class OverlayController(AppKit.NSObject):
         if self is None:
             return None
         self.cfg = cfg
+        self._machine = None
         self._top_left = None       # (left, top) coords Cocoa ; None => coin par defaut
         self._locked = True
         self._on_moved_cb = None
@@ -188,6 +225,9 @@ class OverlayController(AppKit.NSObject):
         self.cfg = cfg
         self._update()
 
+    def setMachine_(self, machine):
+        self._machine = machine
+
     def set_visible(self, visible):
         if visible:
             self.window.orderFront_(None)
@@ -206,8 +246,10 @@ class OverlayController(AppKit.NSObject):
         layer.setCornerRadius_(0.0 if self._locked else 6.0)
 
     def _update(self):
+        text = compose_text(self._machine, read_metrics(),
+                            self.cfg.show_machine_info, self.cfg.show_power)
         astr = AppKit.NSAttributedString.alloc().initWithString_attributes_(
-            overlay_text(read_metrics()), self._attributes())
+            text, self._attributes())
         size = astr.size()
         w = int(math.ceil(size.width)) + 2 * _PAD
         h = int(math.ceil(size.height)) + 2 * _PAD
