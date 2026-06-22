@@ -132,11 +132,21 @@ class MenuBarApp(AppKit.NSObject):
         self.item_show = _make_item(menu, self, "Afficher les temperatures", b"toggleShow:")
         self.item_lock = _make_item(menu, self, "", b"toggleLock:")
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
-        self.item_login = _make_item(menu, self, "Lancer au demarrage", b"toggleLogin:")
-        if not login_supported():
-            self.item_login.setEnabled_(False)
-            self.item_login.setToolTip_("Disponible uniquement dans l'app empaquetee (.app)")
-        menu.addItem_(AppKit.NSMenuItem.separatorItem())
+
+        # sous-menu Affichage : ce qu'on montre dans l'encadre
+        display_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+            "Affichage", None, "")
+        display_menu = AppKit.NSMenu.alloc().init()
+        self.item_machine = _make_item(display_menu, self, "Infos machine", b"toggleMachine:")
+        self.item_power = _make_item(display_menu, self, "Conso (watts)", b"togglePower:")
+        self.item_details = _make_item(display_menu, self, "Détails CPU/GPU", b"toggleDetails:")
+        self.item_swap = _make_item(display_menu, self, "Swap", b"toggleSwap:")
+        self.item_uptime = _make_item(display_menu, self, "Uptime", b"toggleUptime:")
+        self.item_net = _make_item(display_menu, self, "Réseau ↓/↑", b"toggleNet:")
+        display_item.setSubmenu_(display_menu)
+        menu.addItem_(display_item)
+
+        # apparence (au niveau principal)
         _make_item(menu, self, "Police…", b"openFont:")
         _make_item(menu, self, "Couleur…", b"openColor:")
         align_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
@@ -149,13 +159,12 @@ class MenuBarApp(AppKit.NSObject):
             self.align_items[key] = it
         align_item.setSubmenu_(align_menu)
         menu.addItem_(align_item)
-        self.item_machine = _make_item(menu, self, "Infos machine", b"toggleMachine:")
-        self.item_power = _make_item(menu, self, "Conso (watts)", b"togglePower:")
-        self.item_details = _make_item(menu, self, "Détails CPU/GPU", b"toggleDetails:")
-        self.item_swap = _make_item(menu, self, "Swap", b"toggleSwap:")
-        self.item_uptime = _make_item(menu, self, "Uptime", b"toggleUptime:")
-        self.item_net = _make_item(menu, self, "Réseau ↓/↑", b"toggleNet:")
 
+        menu.addItem_(AppKit.NSMenuItem.separatorItem())
+        self.item_login = _make_item(menu, self, "Lancer au demarrage", b"toggleLogin:")
+        if not login_supported():
+            self.item_login.setEnabled_(False)
+            self.item_login.setToolTip_("Disponible uniquement dans l'app empaquetee (.app)")
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
         _make_item(menu, self, "Quitter", b"quit:")
         self.status_item.setMenu_(menu)
