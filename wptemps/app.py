@@ -7,6 +7,7 @@ from . import login
 from .config import Config
 from .overlay import OverlayController, build_font
 from .settings import Settings, load, save
+from .sysinfo import machine_info
 
 
 class AppState:
@@ -95,6 +96,7 @@ class MenuBarApp(AppKit.NSObject):
         )
         self.controller.setOnMoved_(self.state.record_move)
 
+        self.controller.setMachine_(machine_info())
         if self.settings.x is not None and self.settings.y is not None:
             self.controller.set_position(self.settings.x, self.settings.y)
         self.controller.set_locked(self.settings.locked)
@@ -145,6 +147,8 @@ class MenuBarApp(AppKit.NSObject):
             self.align_items[key] = it
         align_item.setSubmenu_(align_menu)
         menu.addItem_(align_item)
+        self.item_machine = _make_item(menu, self, "Infos machine", b"toggleMachine:")
+        self.item_power = _make_item(menu, self, "Conso (watts)", b"togglePower:")
 
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
         _make_item(menu, self, "Quitter", b"quit:")
@@ -167,6 +171,13 @@ class MenuBarApp(AppKit.NSObject):
                 item.setState_(
                     AppKit.NSControlStateValueOn if self.settings.align == key
                     else AppKit.NSControlStateValueOff)
+        if hasattr(self, "item_machine"):
+            self.item_machine.setState_(
+                AppKit.NSControlStateValueOn if self.settings.show_machine_info
+                else AppKit.NSControlStateValueOff)
+            self.item_power.setState_(
+                AppKit.NSControlStateValueOn if self.settings.show_power
+                else AppKit.NSControlStateValueOff)
 
     def toggleShow_(self, sender):
         self.state.toggle_show()
@@ -222,6 +233,14 @@ class MenuBarApp(AppKit.NSObject):
 
     def setAlign_(self, sender):
         self.settings.align = sender.representedObject()
+        self._apply()
+
+    def toggleMachine_(self, sender):
+        self.settings.show_machine_info = not self.settings.show_machine_info
+        self._apply()
+
+    def togglePower_(self, sender):
+        self.settings.show_power = not self.settings.show_power
         self._apply()
 
     def quit_(self, sender):

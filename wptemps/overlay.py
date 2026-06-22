@@ -156,6 +156,7 @@ class OverlayController(AppKit.NSObject):
         if self is None:
             return None
         self.cfg = cfg
+        self._machine = None
         self._top_left = None       # (left, top) coords Cocoa ; None => coin par defaut
         self._locked = True
         self._on_moved_cb = None
@@ -228,6 +229,9 @@ class OverlayController(AppKit.NSObject):
         self.cfg = cfg
         self._update()
 
+    def setMachine_(self, machine):
+        self._machine = machine
+
     def set_visible(self, visible):
         if visible:
             self.window.orderFront_(None)
@@ -246,8 +250,10 @@ class OverlayController(AppKit.NSObject):
         layer.setCornerRadius_(0.0 if self._locked else 6.0)
 
     def _update(self):
+        text = compose_text(self._machine, read_metrics(),
+                            self.cfg.show_machine_info, self.cfg.show_power)
         astr = AppKit.NSAttributedString.alloc().initWithString_attributes_(
-            overlay_text(read_metrics()), self._attributes())
+            text, self._attributes())
         size = astr.size()
         w = int(math.ceil(size.width)) + 2 * _PAD
         h = int(math.ceil(size.height)) + 2 * _PAD
