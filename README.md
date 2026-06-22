@@ -14,21 +14,13 @@ par-dessus le fond d'écran macOS, rafraîchies toutes les 5 s.
 .venv/bin/pip install -r requirements.txt
 ```
 
-## Lancer (mode recommandé : overlay)
+## Lancer
 ```bash
 .venv/bin/python -m wptemps.overlay
 ```
 Affiche le texte dans une fenêtre transparente épinglée **au niveau du bureau**
-(derrière les icônes et les fenêtres). Ton fond d'écran n'est **pas modifié**
+(derrière les icônes et les fenêtres). Ton fond d'écran n'est **jamais modifié**
 et reste dynamique. Pour quitter : Ctrl-C (ou tuer le process) — rien à restaurer.
-
-## Mode alternatif : image de fond régénérée
-```bash
-.venv/bin/python -m wptemps.main
-```
-Remplace le fond d'écran par une image (wallpaper + texte incrusté), rafraîchie
-en boucle. Ctrl-C restaure le fond d'origine. Limite : le fond devient une image
-fixe à la résolution de la source ; préférer le mode overlay.
 
 ## Lancer automatiquement à l'ouverture de session
 ```bash
