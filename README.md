@@ -26,7 +26,8 @@ Ton fond d'écran n'est **jamais modifié**.
 Mode overlay seul (sans menu) : `.venv/bin/python -m wptemps.overlay`.
 
 > « Lancer au démarrage » depuis le menu n'est actif que pour l'app empaquetée
-> (`.app`, à venir). En mode source, utilise `scripts/install-login-item.sh`.
+> (voir « Construire l'app partageable » plus bas). En mode source, utilise
+> `scripts/install-login-item.sh`.
 
 ## Lancer automatiquement à l'ouverture de session
 ```bash
@@ -43,6 +44,20 @@ Réglages dans `wptemps/config.py` : intervalle, position (`top-right`,
 `top-left`, `bottom-left`, `bottom-right`), couleur, opacité, taille de police.
 Si le texte est peu lisible sur un fond clair, augmenter le contraste
 (`color=(0, 0, 0)` ou `opacity=230`).
+
+## Construire l'app partageable (.app)
+```bash
+bash build.sh
+```
+Produit `dist/wptemps.app` : Python, PyObjC et `macmon` sont **embarqués** — le
+destinataire n'installe rien. Cible **Apple Silicon**.
+
+Partage : compresser `dist/wptemps.app` en `.zip` et l'envoyer (ou le déposer sur
+GitHub Releases). L'app n'étant pas signée par un compte développeur Apple, le 1er
+lancement se fait par **clic-droit → Ouvrir** (ensuite, double-clic normal). Une fois
+ouverte, le menu 🌡 propose « Lancer au démarrage ».
+
+Licences tierces : voir `THIRD_PARTY_NOTICES.md` (macmon, MIT).
 
 ## Tests
 ```bash

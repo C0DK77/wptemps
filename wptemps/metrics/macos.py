@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
+import sys
 from typing import Optional
 
 from .base import Metrics
@@ -35,9 +37,20 @@ def parse_battery_pct(pmset_output: str) -> Optional[float]:
     return float(m.group(1)) if m else None
 
 
+def _macmon_path(frozen=None, executable=None, exists=os.path.exists) -> str:
+    frozen = getattr(sys, "frozen", False) if frozen is None else frozen
+    executable = sys.executable if executable is None else executable
+    if frozen:
+        res = os.path.normpath(
+            os.path.join(os.path.dirname(executable), "..", "Resources", "macmon"))
+        if exists(res):
+            return res
+    return "macmon"
+
+
 def _macmon_one_sample() -> str:
     out = subprocess.run(
-        ["macmon", "pipe", "-s", "1", "-i", "200"],
+        [_macmon_path(), "pipe", "-s", "1", "-i", "200"],
         capture_output=True, text=True, timeout=10, check=True,
     )
     return out.stdout.strip().splitlines()[-1]
