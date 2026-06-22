@@ -19,8 +19,10 @@ par-dessus le fond d'écran macOS, rafraîchies toutes les 5 s.
 .venv/bin/python -m wptemps.app
 ```
 Une icône 🌡 apparaît dans la barre de menus. Le menu permet d'afficher/masquer,
-de **déverrouiller pour déplacer** l'affichage (puis le reverrouiller), et de quitter.
-La position est mémorisée dans `~/Library/Application Support/wptemps/settings.json`.
+de **déverrouiller pour déplacer** l'affichage (puis le reverrouiller), de choisir
+**Police…** (police, taille, gras/italique), **Couleur…** (couleur + opacité) et
+**Alignement** (gauche/centre/droite), et de quitter. Tous ces réglages — et la
+position — sont mémorisés dans `~/Library/Application Support/wptemps/settings.json`.
 Ton fond d'écran n'est **jamais modifié**.
 
 Mode overlay seul (sans menu) : `.venv/bin/python -m wptemps.overlay`.
