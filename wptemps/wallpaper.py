@@ -36,3 +36,14 @@ def load_base_image(path: str) -> Image.Image:
             capture_output=True, text=True, timeout=30, check=True,
         )
         return Image.open(tmp).convert("RGB")
+
+
+def load_base_or_default(path: str) -> Image.Image:
+    """Charge le wallpaper d'origine ; si le chemin est vide/illisible
+    (ex. wallpaper dynamique), retombe sur un fond uni au lieu de planter."""
+    if path and os.path.isfile(path):
+        try:
+            return load_base_image(path)
+        except Exception:
+            pass
+    return Image.new("RGB", (2560, 1440), (20, 20, 30))

@@ -13,15 +13,12 @@ def _load_font(cfg: Config) -> "ImageFont.FreeTypeFont":
         return ImageFont.load_default()
 
 
-def _text_block_size(draw, lines, font, spacing):
-    widths, heights = [], []
-    for line in lines:
-        box = draw.textbbox((0, 0), line, font=font)
-        widths.append(box[2] - box[0])
-        heights.append(box[3] - box[1])
-    width = max(widths) if widths else 0
-    height = sum(heights) + spacing * (len(lines) - 1 if lines else 0)
-    return width, height, heights
+def _line_height(font, cfg: Config) -> int:
+    try:
+        ascent, descent = font.getmetrics()
+        return ascent + descent
+    except Exception:
+        return cfg.font_size + 4
 
 
 def _origin(position, img_size, block, margin):
@@ -31,6 +28,10 @@ def _origin(position, img_size, block, margin):
     top = position.startswith("top")
     x = margin if left else iw - bw - margin
     y = margin if top else ih - bh - margin
+    # clamp dans [0, dim - bloc] : le texte reste visible meme si l'image
+    # est plus petite que le bloc ou que la marge.
+    x = max(0, min(int(x), iw - int(bw)))
+    y = max(0, min(int(y), ih - int(bh)))
     return x, y
 
 
@@ -41,16 +42,19 @@ def render(m: Metrics, base: Image.Image, cfg: Config) -> Image.Image:
     font = _load_font(cfg)
     lines = format_lines(m)
 
-    bw, bh, heights = _text_block_size(draw, lines, font, cfg.line_spacing)
+    line_h = _line_height(font, cfg)
+    widths = [draw.textlength(line, font=font) for line in lines]
+    bw = max(widths) if widths else 0
+    bh = line_h * len(lines) + cfg.line_spacing * (len(lines) - 1 if lines else 0)
     x, y = _origin(cfg.position, img.size, (bw, bh), cfg.margin)
 
     fill = cfg.color + (cfg.opacity,)
     shadow_fill = (0, 0, 0, min(cfg.opacity, 160))
     cy = y
-    for line, h in zip(lines, heights):
+    for line in lines:
         if cfg.shadow:
             draw.text((x + 2, cy + 2), line, font=font, fill=shadow_fill)
         draw.text((x, cy), line, font=font, fill=fill)
-        cy += h + cfg.line_spacing
+        cy += line_h + cfg.line_spacing
 
     return Image.alpha_composite(img, overlay).convert("RGB")

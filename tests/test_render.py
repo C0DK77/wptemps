@@ -27,3 +27,11 @@ def test_render_does_not_mutate_base():
     before = list(base.getdata())
     render(Metrics(cpu_temp=55.0), base, Config())
     assert list(base.getdata()) == before  # base inchangee
+
+
+def test_render_clamps_origin_for_small_image():
+    # image plus petite que le bloc de texte -> origine clampee a >= 0, pas de crash
+    tiny = Image.new("RGB", (50, 20), (0, 0, 0))
+    out = render(Metrics(cpu_temp=55.0, gpu_temp=48.0), tiny, Config())
+    assert out.size == (50, 20)
+    assert any(px != (0, 0, 0) for px in out.getdata())  # texte visible (pas hors-cadre)

@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import json
 import re
+import subprocess
 from typing import Optional
+
+from .base import Metrics
 
 _GB = 1024 ** 3
 
@@ -31,10 +35,6 @@ def parse_battery_pct(pmset_output: str) -> Optional[float]:
     return float(m.group(1)) if m else None
 
 
-import json
-import subprocess
-
-
 def _macmon_one_sample() -> str:
     out = subprocess.run(
         ["macmon", "pipe", "-s", "1", "-i", "200"],
@@ -51,8 +51,7 @@ def _pmset_battery() -> str:
     return out.stdout
 
 
-def read_metrics(sampler=_macmon_one_sample, battery_reader=_pmset_battery) -> "Metrics":
-    from .base import Metrics
+def read_metrics(sampler=_macmon_one_sample, battery_reader=_pmset_battery) -> Metrics:
     fields = {}
     try:
         fields.update(metrics_from_macmon(json.loads(sampler())))

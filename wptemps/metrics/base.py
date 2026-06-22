@@ -23,7 +23,7 @@ def _pct(v: Optional[float]) -> str:
     return f"{v:.0f}%" if v is not None else "N/A"
 
 
-def format_lines(m: Metrics) -> list:
+def format_lines(m: Metrics) -> list[str]:
     lines = [
         f"CPU  {_temp(m.cpu_temp)}  {_pct(m.cpu_load)}",
         f"GPU  {_temp(m.gpu_temp)}",
