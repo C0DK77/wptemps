@@ -23,6 +23,8 @@ def _frac_to_pct(v: Optional[float]) -> Optional[float]:
 def metrics_from_macmon(sample: dict) -> dict:
     temp = sample.get("temp") or {}
     mem = sample.get("memory") or {}
+    gpu = sample.get("gpu_usage") or []
+    pcpu = sample.get("pcpu_usage") or []
     return {
         "cpu_temp": temp.get("cpu_temp_avg"),
         "gpu_temp": temp.get("gpu_temp_avg"),
@@ -31,6 +33,11 @@ def metrics_from_macmon(sample: dict) -> dict:
         "ram_total_gb": _bytes_to_gb(mem.get("ram_total")),
         "cpu_power": sample.get("cpu_power"),
         "gpu_power": sample.get("gpu_power"),
+        "gpu_load": round(gpu[1] * 100, 1) if len(gpu) >= 2 else None,
+        "gpu_freq_mhz": gpu[0] if len(gpu) >= 1 else None,
+        "cpu_freq_mhz": pcpu[0] if len(pcpu) >= 1 else None,
+        "swap_used_gb": _bytes_to_gb(mem.get("swap_usage")),
+        "swap_total_gb": _bytes_to_gb(mem.get("swap_total")),
     }
 
 
