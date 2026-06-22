@@ -146,9 +146,12 @@ class MenuBarApp(AppKit.NSObject):
         display_item.setSubmenu_(display_menu)
         menu.addItem_(display_item)
 
-        # apparence (au niveau principal)
-        _make_item(menu, self, "Police…", b"openFont:")
-        _make_item(menu, self, "Couleur…", b"openColor:")
+        # sous-menu Apparence : comment c'est affiche
+        apparence_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+            "Apparence", None, "")
+        apparence_menu = AppKit.NSMenu.alloc().init()
+        _make_item(apparence_menu, self, "Police…", b"openFont:")
+        _make_item(apparence_menu, self, "Couleur…", b"openColor:")
         align_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
             "Alignement", None, "")
         align_menu = AppKit.NSMenu.alloc().init()
@@ -158,7 +161,9 @@ class MenuBarApp(AppKit.NSObject):
             it.setRepresentedObject_(key)
             self.align_items[key] = it
         align_item.setSubmenu_(align_menu)
-        menu.addItem_(align_item)
+        apparence_menu.addItem_(align_item)
+        apparence_item.setSubmenu_(apparence_menu)
+        menu.addItem_(apparence_item)
 
         menu.addItem_(AppKit.NSMenuItem.separatorItem())
         self.item_login = _make_item(menu, self, "Lancer au demarrage", b"toggleLogin:")
