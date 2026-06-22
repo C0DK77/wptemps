@@ -1,0 +1,4 @@
+Pillow==10.4.0
+pytest==8.3.2
+pyobjc-framework-Cocoa==12.0
+pyobjc-framework-Quartz==12.0
