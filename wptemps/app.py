@@ -234,6 +234,9 @@ class MenuBarApp(AppKit.NSObject):
                          self.settings.bold, self.settings.italic)
         fm.setSelectedFont_isMultiple_(cur, False)
         fm.orderFrontFontPanel_(self)
+        # masque la barre d'outils du panneau (effets soulignement/couleur/ombre…)
+        # : ces boutons envoient changeAttributes: qu'on n'utilise pas -> inutiles ici.
+        AppKit.NSFontPanel.sharedFontPanel().setToolbar_(None)
 
     def changeFont_(self, sender):
         fm = AppKit.NSFontManager.sharedFontManager()
