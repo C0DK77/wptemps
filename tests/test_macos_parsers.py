@@ -42,6 +42,14 @@ def test_metrics_from_macmon_extracts_power():
     assert d["gpu_power"] == 0.12
 
 
+def test_macmon_stream_keeps_latest_nonempty_line():
+    from wptemps.metrics.macos import MacmonStream
+    s = MacmonStream(["macmon"])
+    assert s.latest() is None
+    s._loop(iter(['{"a": 1}\n', '   \n', '{"a": 2}\n']))   # simule le flux
+    assert s.latest() == '{"a": 2}'
+
+
 def test_metrics_from_macmon_extracts_details_and_swap():
     sample = dict(SAMPLE)
     sample["gpu_usage"] = [416, 0.01]

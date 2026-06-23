@@ -294,6 +294,8 @@ class MenuBarApp(AppKit.NSObject):
         self._apply()
 
     def quit_(self, sender):
+        from .metrics.macos import stop_macmon_stream
+        stop_macmon_stream()  # arrete le macmon en continu
         AppKit.NSApp.terminate_(self)
 
 
