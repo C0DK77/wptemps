@@ -1,14 +1,14 @@
 # Formule Homebrew Cask pour wptemps.
-# A heberger dans TON tap (depot "homebrew-tap"). Remplace <TON_USER_GITHUB>
+# A heberger dans TON tap (depot "homebrew-tap"). Remplace C0DK77
 # et le sha256 (donne par scripts/make-dmg.sh) apres avoir cree la Release.
 cask "wptemps" do
   version "1.0.0"
   sha256 "11151c304f6e2604d243997b654a3dec438f1eee0697a1601a08cafa8a6bb33d"
 
-  url "https://github.com/<TON_USER_GITHUB>/wptemps/releases/download/v#{version}/wptemps-#{version}.dmg"
+  url "https://github.com/C0DK77/wptemps/releases/download/v#{version}/wptemps-#{version}.dmg"
   name "wptemps"
   desc "Overlay des temperatures et infos materiel sur le bureau (Apple Silicon)"
-  homepage "https://github.com/<TON_USER_GITHUB>/wptemps"
+  homepage "https://github.com/C0DK77/wptemps"
 
   depends_on arch: :arm64
 

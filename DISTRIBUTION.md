@@ -28,11 +28,11 @@ puis crée la Release et téléverse le `.dmg` à la main.)
 
 1. Crée un dépôt public **`homebrew-tap`** sur ton compte.
 2. Mets-y `Casks/wptemps.rb` (copie celui de ce repo), en remplaçant
-   `<TON_USER_GITHUB>` et le `sha256` par celui du `.dmg`.
+   `C0DK77` et le `sha256` par celui du `.dmg`.
 3. Les utilisateurs installent ainsi :
 
 ```bash
-brew tap <TON_USER_GITHUB>/tap
+brew tap C0DK77/tap
 brew install --cask wptemps          # ajouter --no-quarantine pour eviter le clic-droit
 ```
 
@@ -40,7 +40,7 @@ brew install --cask wptemps          # ajouter --no-quarantine pour eviter le cl
 
 - **Télécharger** : page *Releases* du dépôt → `wptemps-x.y.z.dmg` → glisser l'app dans
   Applications → **clic-droit → Ouvrir** la 1ʳᵉ fois.
-- **Ou** : `brew tap <TON_USER_GITHUB>/tap && brew install --cask wptemps`.
+- **Ou** : `brew tap C0DK77/tap && brew install --cask wptemps`.
 - L'app vit dans la **barre de menus** (icône 🌡) ; pas d'icône Dock, pas de fenêtre.
 
 ## Mises à jour
