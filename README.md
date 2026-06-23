@@ -1,9 +1,28 @@
-# wptemps — températures du Mac sur le fond d'écran
+# wptemps — overlay des températures et infos matériel (macOS)
 
-Affiche les températures CPU/GPU, la charge CPU, la RAM et la batterie
-par-dessus le fond d'écran macOS, rafraîchies toutes les 5 s.
+Petite app **barre de menus** qui affiche, en surimpression sur le bureau, les
+températures CPU/GPU, la charge, la RAM, et (en option) la conso en watts, les
+fréquences, le swap, l'uptime, le débit réseau et les infos machine — sans
+jamais modifier ton fond d'écran. **Apple Silicon uniquement.**
 
-## Prérequis
+## Installation (utilisateur)
+
+**Option A — télécharger l'app** : récupère `wptemps-x.y.z.dmg` dans les
+[Releases](../../releases), glisse `wptemps.app` dans Applications, puis
+**clic-droit → Ouvrir** au 1er lancement (app non signée).
+
+**Option B — Homebrew** :
+```bash
+brew tap <TON_USER_GITHUB>/tap
+brew install --cask wptemps        # ajouter --no-quarantine pour eviter le clic-droit
+```
+
+L'app vit dans la **barre de menus** (icône 🌡) — pas d'icône Dock ni de fenêtre.
+Clique l'icône pour afficher/masquer, déplacer, choisir l'apparence et les infos.
+
+> Tu veux distribuer cette app ? Voir [DISTRIBUTION.md](DISTRIBUTION.md).
+
+## Prérequis (développement)
 - macOS Apple Silicon
 - `brew install macmon`
 - Python 3.9+

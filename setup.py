@@ -9,6 +9,7 @@ setup(
     app=["wptemps_app.py"],
     options={"py2app": {
         "argv_emulation": False,
+        "iconfile": "wptemps.icns",
         "plist": {
             "LSUIElement": True,
             "CFBundleName": "wptemps",
