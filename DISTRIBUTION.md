@@ -41,7 +41,7 @@ brew install --cask wptemps          # ajouter --no-quarantine pour eviter le cl
 
 - **Télécharger** : page *Releases* du dépôt → `wptemps-x.y.z.dmg` → glisser l'app dans
   Applications → **clic-droit → Ouvrir** la 1ʳᵉ fois.
-- **Ou** : `brew tap C0DK77/tap && brew install --cask wptemps`.
+- **Ou** : `brew tap C0DK77/tap && brew trust c0dk77/tap && brew install --cask wptemps`.
 - L'app vit dans la **barre de menus** (icône 🌡) ; pas d'icône Dock, pas de fenêtre.
 
 ## Mises à jour
