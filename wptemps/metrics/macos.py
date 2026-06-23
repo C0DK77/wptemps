@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import atexit
 import json
 import os
 import re
 import subprocess
 import sys
+import threading
 from typing import Optional
 
 from .base import Metrics
@@ -57,7 +59,59 @@ def _macmon_path(frozen=None, executable=None, exists=os.path.exists) -> str:
     return "macmon"
 
 
+class MacmonStream:
+    """Un seul `macmon pipe` qui diffuse en continu ; on garde le dernier echantillon.
+    Evite de relancer macmon (~1.3 s de demarrage) a chaque lecture."""
+
+    def __init__(self, cmd):
+        self._cmd = cmd
+        self._proc = None
+        self._latest = None
+
+    def start(self, popen=subprocess.Popen):
+        self._proc = popen(self._cmd, stdout=subprocess.PIPE, text=True)
+        threading.Thread(target=self._loop, args=(self._proc.stdout,), daemon=True).start()
+        atexit.register(self.stop)
+        return self
+
+    def _loop(self, stream):
+        for line in stream:
+            line = line.strip()
+            if line:
+                self._latest = line   # affectation atomique (GIL)
+
+    def latest(self):
+        return self._latest
+
+    def alive(self):
+        return self._proc is not None and self._proc.poll() is None
+
+    def stop(self):
+        try:
+            if self._proc is not None and self._proc.poll() is None:
+                self._proc.terminate()
+        except Exception:
+            pass
+
+
+_stream = None
+
+
+def stop_macmon_stream():
+    global _stream
+    if _stream is not None:
+        _stream.stop()
+        _stream = None
+
+
 def _macmon_one_sample() -> str:
+    global _stream
+    if _stream is None or not _stream.alive():
+        _stream = MacmonStream([_macmon_path(), "pipe", "-i", "1000"]).start()
+    line = _stream.latest()
+    if line is not None:
+        return line
+    # le flux vient de demarrer (pas encore d'echantillon) -> one-shot de secours
     out = subprocess.run(
         [_macmon_path(), "pipe", "-s", "1", "-i", "200"],
         capture_output=True, text=True, timeout=10, check=True,
