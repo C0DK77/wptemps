@@ -60,6 +60,20 @@ def test_lock_params_unlocked():
     assert p["bg_alpha"] > 0.0
 
 
+def test_set_config_renders_from_cache_without_reading(monkeypatch):
+    # un clic menu (set_config) ne doit JAMAIS lire les capteurs (sinon l'UI gele)
+    import wptemps.overlay as ov
+    from wptemps.config import Config
+    from wptemps.metrics.base import Metrics
+    AppKit.NSApplication.sharedApplication()
+    monkeypatch.setattr(ov, "read_metrics",
+                        lambda *a, **k: (_ for _ in ()).throw(AssertionError("lecture capteur!")))
+    c = ov.OverlayController.alloc().initWithConfig_(Config())
+    c._last_metrics = Metrics(cpu_temp=50.0)
+    c.set_config(Config(show_machine_info=False))   # doit re-rendre depuis le cache, sans lire
+    c.set_config(Config(show_machine_info=True))
+
+
 def test_paragraph_style_uses_clipping_no_wrap():
     from wptemps.overlay import _make_paragraph_style
     p = _make_paragraph_style("left", 10)
