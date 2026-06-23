@@ -4,6 +4,7 @@ au premier plan pour etre deplacee. La fenetre ne modifie jamais le wallpaper.""
 from __future__ import annotations
 
 import math
+import threading
 
 import AppKit
 import objc
@@ -202,6 +203,8 @@ class OverlayController(AppKit.NSObject):
         self.cfg = cfg
         self._machine = None
         self._net_meter = NetRateMeter()
+        self._last_metrics = None   # dernier echantillon (lu en arriere-plan)
+        self._reading = False       # garde anti-lectures concurrentes
         self._top_left = None       # (left, top) coords Cocoa ; None => coin par defaut
         self._locked = True
         self._on_moved_cb = None
@@ -271,8 +274,10 @@ class OverlayController(AppKit.NSObject):
         self._top_left = None if (left is None or top is None) else (left, top)
 
     def set_config(self, cfg):
+        # re-rend instantanement depuis le dernier echantillon en cache
+        # (aucune lecture capteur ici -> pas de blocage de l'UI au clic menu).
         self.cfg = cfg
-        self._update()
+        self._render()
 
     def setMachine_(self, machine):
         self._machine = machine
@@ -294,8 +299,12 @@ class OverlayController(AppKit.NSObject):
             AppKit.NSColor.blackColor().colorWithAlphaComponent_(p["bg_alpha"]).CGColor())
         layer.setCornerRadius_(0.0 if self._locked else 6.0)
 
-    def _update(self):
-        m = apply_extras(read_metrics(), self._net_meter)
+    def _render(self):
+        # FIL PRINCIPAL UNIQUEMENT. Compose depuis le dernier echantillon en cache
+        # (aucune lecture capteur ici) puis met a jour la fenetre/label.
+        m = self._last_metrics
+        if m is None:
+            return
         text = compose_text(self._machine, m, self.cfg)
         astr = AppKit.NSAttributedString.alloc().initWithString_attributes_(
             text, self._attributes())
@@ -314,10 +323,27 @@ class OverlayController(AppKit.NSObject):
         self.label.setAttributedStringValue_(astr)
 
     def tick_(self, timer):
-        self._update()
+        # lance la lecture des capteurs en ARRIERE-PLAN (pas sur le fil de l'UI)
+        if self._reading:
+            return  # une lecture est deja en cours -> on saute ce tick
+        self._reading = True
+        threading.Thread(target=self._bg_read, daemon=True).start()
+
+    def _bg_read(self):
+        try:
+            self._last_metrics = apply_extras(read_metrics(), self._net_meter)
+        except Exception as exc:  # robustesse : ne jamais tuer le thread
+            print(f"[wptemps] read error: {exc}")
+        # repasse sur le fil principal pour dessiner
+        self.performSelectorOnMainThread_withObject_waitUntilDone_(
+            b"_renderMain:", None, False)
+
+    def _renderMain_(self, _arg):
+        self._reading = False
+        self._render()
 
     def start(self):
-        self._update()
+        self.tick_(None)   # premier echantillon en arriere-plan (lancement non bloquant)
         self.timer = (
             AppKit.NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
                 self.cfg.interval_sec, self, b"tick:", None, True))
