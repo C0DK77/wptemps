@@ -3,7 +3,7 @@
 # et le sha256 (donne par scripts/make-dmg.sh) apres avoir cree la Release.
 cask "wptemps" do
   version "1.0.0"
-  sha256 "11151c304f6e2604d243997b654a3dec438f1eee0697a1601a08cafa8a6bb33d"
+  sha256 "4bb49bef7406dfdbebc20eeaa0795378656233f895c8e7682c80edca7af6807b"
 
   url "https://github.com/C0DK77/wptemps/releases/download/v#{version}/wptemps-#{version}.dmg"
   name "wptemps"
