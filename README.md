@@ -14,6 +14,7 @@ jamais modifier ton fond d'écran. **Apple Silicon uniquement.**
 **Option B — Homebrew** :
 ```bash
 brew tap C0DK77/tap
+brew trust c0dk77/tap              # requis par Homebrew pour un tap tiers
 brew install --cask wptemps        # ajouter --no-quarantine pour eviter le clic-droit
 ```
 

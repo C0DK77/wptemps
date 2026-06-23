@@ -33,6 +33,7 @@ puis crée la Release et téléverse le `.dmg` à la main.)
 
 ```bash
 brew tap C0DK77/tap
+brew trust c0dk77/tap              # requis pour un tap tiers
 brew install --cask wptemps          # ajouter --no-quarantine pour eviter le clic-droit
 ```
 
