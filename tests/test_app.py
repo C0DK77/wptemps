@@ -119,7 +119,7 @@ def test_toggle_box_frame_updates_controller_and_saves():
     calls = []
 
     class FakeController:
-        def set_decorations(self, show_box, show_frame):
+        def set_decorations(self, show_box, show_frame, box_color=None, box_opacity=None):
             calls.append((show_box, show_frame))
 
     app = appmod.MenuBarApp.alloc().init()
@@ -141,3 +141,78 @@ def test_toggle_box_frame_updates_controller_and_saves():
         assert saved == {"show_box": True, "show_frame": True}
     finally:
         appmod.save = original_save
+
+
+def test_change_color_routes_to_box_target():
+    import AppKit
+    import wptemps.app as appmod
+    from wptemps.settings import Settings
+
+    AppKit.NSApplication.sharedApplication()
+    calls = []
+
+    class FakeController:
+        def set_decorations(self, show_box, show_frame, box_color, box_opacity):
+            calls.append((show_box, show_frame, box_color, box_opacity))
+        def set_config(self, cfg):
+            calls.append(("config", cfg))
+
+    app = appmod.MenuBarApp.alloc().init()
+    app.settings = Settings(show_box=True, show_frame=False)
+    app.controller = FakeController()
+    app._color_target = "box"
+
+    # le panneau partage : on lui fixe une couleur connue, changeColor_ la relit
+    cp = AppKit.NSColorPanel.sharedColorPanel()
+    cp.setColor_(AppKit.NSColor.colorWithSRGBRed_green_blue_alpha_(1.0, 0.0, 0.0, 0.5))
+
+    import types
+    original_save = appmod.save
+    appmod.save = lambda s: None
+    app._refresh_checks = types.MethodType(lambda self: None, app)
+    try:
+        app.changeColor_(None)
+    finally:
+        appmod.save = original_save
+
+    assert app.settings.box_color == (255, 0, 0)
+    assert app.settings.box_opacity == 128          # round(0.5*255)
+    # routé vers set_decorations avec la nouvelle couleur, pas set_config
+    assert calls[-1] == (True, False, (255, 0, 0), 128)
+    assert all(c[0] != "config" for c in calls)
+
+
+def test_change_color_text_target_unchanged():
+    import AppKit
+    import wptemps.app as appmod
+    from wptemps.settings import Settings
+
+    AppKit.NSApplication.sharedApplication()
+    applied = []
+
+    class FakeController:
+        def set_config(self, cfg):
+            applied.append(cfg)
+        def set_decorations(self, *a):
+            applied.append(("deco", a))
+
+    app = appmod.MenuBarApp.alloc().init()
+    app.settings = Settings()
+    app.controller = FakeController()
+    app._color_target = "text"
+
+    cp = AppKit.NSColorPanel.sharedColorPanel()
+    cp.setColor_(AppKit.NSColor.colorWithSRGBRed_green_blue_alpha_(0.0, 1.0, 0.0, 1.0))
+
+    import types
+    original_save = appmod.save
+    appmod.save = lambda s: None
+    app._refresh_checks = types.MethodType(lambda self: None, app)
+    try:
+        app.changeColor_(None)
+    finally:
+        appmod.save = original_save
+
+    assert app.settings.color == (0, 255, 0)
+    assert app.settings.opacity == 255
+    assert applied and not isinstance(applied[-1], tuple)   # set_config appelé (chemin texte)

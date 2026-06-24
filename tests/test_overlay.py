@@ -62,32 +62,31 @@ def test_lock_params_unlocked():
 
 def test_box_style_locked_bare():
     s = box_style(locked=True, show_box=False, show_frame=False)
-    assert s["bg_alpha"] == 0.0
+    assert s["fill_mode"] == "none"
     assert s["border_width"] == 0.0
     assert s["corner_radius"] == 0.0
 
 
 def test_box_style_locked_box_only():
     s = box_style(locked=True, show_box=True, show_frame=False)
-    assert s["bg_alpha"] == 0.25
+    assert s["fill_mode"] == "custom"
     assert s["border_width"] == 0.0
     assert s["corner_radius"] == 6.0
 
 
 def test_box_style_locked_frame_only():
     s = box_style(locked=True, show_box=False, show_frame=True)
-    assert s["bg_alpha"] == 0.0
+    assert s["fill_mode"] == "none"
     assert s["border_width"] == 1.0
     assert s["border_alpha"] == 0.25
     assert s["corner_radius"] == 6.0
 
 
-def test_box_style_unlocked_always_has_grab_fill():
-    # en deplacement le fond reste a 25% quel que soit show_box (repere de saisie)
+def test_box_style_unlocked_is_grab():
     off = box_style(locked=False, show_box=False, show_frame=False)
     on = box_style(locked=False, show_box=True, show_frame=False)
-    assert off["bg_alpha"] == 0.25
-    assert on["bg_alpha"] == 0.25
+    assert off["fill_mode"] == "grab"
+    assert on["fill_mode"] == "grab"
     assert off["corner_radius"] == 6.0
 
 
@@ -240,3 +239,13 @@ def test_compose_text_details_on_gpu_line():
     lines = compose_text(MachineInfo(), m, cfg).split("\n")
     assert lines[0] == "CPU  55°C  10%  3.4GHz"
     assert lines[1] == "GPU  46°C  2%  416MHz"
+
+
+def test_set_decorations_stores_box_color():
+    import wptemps.overlay as ov
+    from wptemps.config import Config
+    AppKit.NSApplication.sharedApplication()
+    c = ov.OverlayController.alloc().initWithConfig_(Config())
+    c.set_decorations(True, False, (10, 20, 30), 128)
+    assert c._box_color == (10, 20, 30)
+    assert c._box_opacity == 128

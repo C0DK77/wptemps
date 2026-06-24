@@ -103,7 +103,7 @@ class MenuBarApp(AppKit.NSObject):
         if self.settings.x is not None and self.settings.y is not None:
             self.controller.set_position(self.settings.x, self.settings.y)
         self.controller.set_locked(self.settings.locked)
-        self.controller.set_decorations(self.settings.show_box, self.settings.show_frame)
+        self._apply_decorations()
         self.controller.start()                       # rend une fois a la bonne position
         self.controller.set_visible(self.settings.show)  # puis montre (ou non) sans flash
 
@@ -115,6 +115,7 @@ class MenuBarApp(AppKit.NSObject):
         cp.setTarget_(self)
         cp.setAction_(b"changeColor:")
         cp.setShowsAlpha_(True)
+        self._color_target = "text"
 
         self._build_status_item()
         return self
@@ -155,6 +156,7 @@ class MenuBarApp(AppKit.NSObject):
         apparence_menu = AppKit.NSMenu.alloc().init()
         _make_item(apparence_menu, self, "Police…", b"openFont:")
         _make_item(apparence_menu, self, "Couleur…", b"openColor:")
+        _make_item(apparence_menu, self, "Couleur du fond…", b"openBoxColor:")
         align_item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
             "Alignement", None, "")
         align_menu = AppKit.NSMenu.alloc().init()
@@ -261,6 +263,7 @@ class MenuBarApp(AppKit.NSObject):
         self._apply()
 
     def openColor_(self, sender):
+        self._color_target = "text"
         AppKit.NSApp.activateIgnoringOtherApps_(True)
         cp = AppKit.NSColorPanel.sharedColorPanel()
         r, g, b = self.settings.color
@@ -270,9 +273,25 @@ class MenuBarApp(AppKit.NSObject):
 
     def changeColor_(self, sender):
         f = color_to_fields(AppKit.NSColorPanel.sharedColorPanel().color())
-        self.settings.color = f["color"]
-        self.settings.opacity = f["opacity"]
-        self._apply()
+        if getattr(self, "_color_target", "text") == "box":
+            self.settings.box_color = f["color"]
+            self.settings.box_opacity = f["opacity"]
+            self._apply_decorations()
+            save(self.settings)
+            self._refresh_checks()
+        else:
+            self.settings.color = f["color"]
+            self.settings.opacity = f["opacity"]
+            self._apply()
+
+    def openBoxColor_(self, sender):
+        self._color_target = "box"
+        AppKit.NSApp.activateIgnoringOtherApps_(True)
+        cp = AppKit.NSColorPanel.sharedColorPanel()
+        r, g, b = self.settings.box_color
+        cp.setColor_(AppKit.NSColor.colorWithSRGBRed_green_blue_alpha_(
+            r / 255.0, g / 255.0, b / 255.0, self.settings.box_opacity / 255.0))
+        cp.orderFront_(self)
 
     def setAlign_(self, sender):
         self.settings.align = sender.representedObject()
@@ -306,15 +325,20 @@ class MenuBarApp(AppKit.NSObject):
         self.settings.show_battery = not self.settings.show_battery
         self._apply()
 
+    def _apply_decorations(self):
+        self.controller.set_decorations(
+            self.settings.show_box, self.settings.show_frame,
+            self.settings.box_color, self.settings.box_opacity)
+
     def toggleBox_(self, sender):
         self.settings.show_box = not self.settings.show_box
-        self.controller.set_decorations(self.settings.show_box, self.settings.show_frame)
+        self._apply_decorations()
         save(self.settings)
         self._refresh_checks()
 
     def toggleFrame_(self, sender):
         self.settings.show_frame = not self.settings.show_frame
-        self.controller.set_decorations(self.settings.show_box, self.settings.show_frame)
+        self._apply_decorations()
         save(self.settings)
         self._refresh_checks()
 
