@@ -1,7 +1,7 @@
 import AppKit
 import Quartz
 
-from wptemps.overlay import compute_origin, lock_params, place_top_left
+from wptemps.overlay import box_style, compute_origin, lock_params, place_top_left
 
 
 def test_compute_origin_top_right():
@@ -48,7 +48,7 @@ def test_lock_params_locked():
     assert p["level"] == desktop + 1
     assert p["ignores_mouse"] is True
     assert p["draggable"] is False
-    assert p["bg_alpha"] == 0.0
+    assert "bg_alpha" not in p
 
 
 def test_lock_params_unlocked():
@@ -57,7 +57,38 @@ def test_lock_params_unlocked():
     assert p["level"] == AppKit.NSFloatingWindowLevel
     assert p["ignores_mouse"] is False
     assert p["draggable"] is True
-    assert p["bg_alpha"] > 0.0
+    assert "bg_alpha" not in p
+
+
+def test_box_style_locked_bare():
+    s = box_style(locked=True, show_box=False, show_frame=False)
+    assert s["bg_alpha"] == 0.0
+    assert s["border_width"] == 0.0
+    assert s["corner_radius"] == 0.0
+
+
+def test_box_style_locked_box_only():
+    s = box_style(locked=True, show_box=True, show_frame=False)
+    assert s["bg_alpha"] == 0.25
+    assert s["border_width"] == 0.0
+    assert s["corner_radius"] == 6.0
+
+
+def test_box_style_locked_frame_only():
+    s = box_style(locked=True, show_box=False, show_frame=True)
+    assert s["bg_alpha"] == 0.0
+    assert s["border_width"] == 1.0
+    assert s["border_alpha"] == 0.25
+    assert s["corner_radius"] == 6.0
+
+
+def test_box_style_unlocked_always_has_grab_fill():
+    # en deplacement le fond reste a 25% quel que soit show_box (repere de saisie)
+    off = box_style(locked=False, show_box=False, show_frame=False)
+    on = box_style(locked=False, show_box=True, show_frame=False)
+    assert off["bg_alpha"] == 0.25
+    assert on["bg_alpha"] == 0.25
+    assert off["corner_radius"] == 6.0
 
 
 def test_set_config_renders_from_cache_without_reading(monkeypatch):
