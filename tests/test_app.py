@@ -108,3 +108,36 @@ def test_apply_style_applies_and_saves():
     assert applied and applied[0].font_name == "Courier New"
     assert applied[0].align == "center"
     assert saved == [s]
+
+
+def test_toggle_box_frame_updates_controller_and_saves():
+    import types
+    import wptemps.app as appmod
+    from wptemps.settings import Settings
+
+    saved = {}
+    calls = []
+
+    class FakeController:
+        def set_decorations(self, show_box, show_frame):
+            calls.append((show_box, show_frame))
+
+    app = appmod.MenuBarApp.alloc().init()
+    app.settings = Settings()
+    app.controller = FakeController()
+
+    original_save = appmod.save
+    appmod.save = lambda s: saved.update({"show_box": s.show_box, "show_frame": s.show_frame})
+    app._refresh_checks = types.MethodType(lambda self: None, app)
+
+    try:
+        app.toggleBox_(None)
+        assert app.settings.show_box is True
+        assert calls[-1] == (True, False)
+
+        app.toggleFrame_(None)
+        assert app.settings.show_frame is True
+        assert calls[-1] == (True, True)
+        assert saved == {"show_box": True, "show_frame": True}
+    finally:
+        appmod.save = original_save
