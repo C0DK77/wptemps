@@ -103,6 +103,7 @@ class MenuBarApp(AppKit.NSObject):
         if self.settings.x is not None and self.settings.y is not None:
             self.controller.set_position(self.settings.x, self.settings.y)
         self.controller.set_locked(self.settings.locked)
+        self.controller.set_decorations(self.settings.show_box, self.settings.show_frame)
         self.controller.start()                       # rend une fois a la bonne position
         self.controller.set_visible(self.settings.show)  # puis montre (ou non) sans flash
 
@@ -164,6 +165,8 @@ class MenuBarApp(AppKit.NSObject):
             self.align_items[key] = it
         align_item.setSubmenu_(align_menu)
         apparence_menu.addItem_(align_item)
+        self.item_frame = _make_item(apparence_menu, self, "Contour", b"toggleFrame:")
+        self.item_box = _make_item(apparence_menu, self, "Fond", b"toggleBox:")
         apparence_item.setSubmenu_(apparence_menu)
         menu.addItem_(apparence_item)
 
@@ -208,6 +211,13 @@ class MenuBarApp(AppKit.NSObject):
                                (self.item_battery, self.settings.show_battery)):
                 item.setState_(AppKit.NSControlStateValueOn if flag
                                else AppKit.NSControlStateValueOff)
+        if hasattr(self, "item_box"):
+            self.item_box.setState_(
+                AppKit.NSControlStateValueOn if self.settings.show_box
+                else AppKit.NSControlStateValueOff)
+            self.item_frame.setState_(
+                AppKit.NSControlStateValueOn if self.settings.show_frame
+                else AppKit.NSControlStateValueOff)
 
     def toggleShow_(self, sender):
         self.state.toggle_show()
@@ -295,6 +305,18 @@ class MenuBarApp(AppKit.NSObject):
     def toggleBattery_(self, sender):
         self.settings.show_battery = not self.settings.show_battery
         self._apply()
+
+    def toggleBox_(self, sender):
+        self.settings.show_box = not self.settings.show_box
+        self.controller.set_decorations(self.settings.show_box, self.settings.show_frame)
+        save(self.settings)
+        self._refresh_checks()
+
+    def toggleFrame_(self, sender):
+        self.settings.show_frame = not self.settings.show_frame
+        self.controller.set_decorations(self.settings.show_box, self.settings.show_frame)
+        save(self.settings)
+        self._refresh_checks()
 
     def quit_(self, sender):
         from .metrics.macos import stop_macmon_stream

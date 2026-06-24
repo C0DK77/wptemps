@@ -29,6 +29,8 @@ class Settings:
     show_uptime: bool = False
     show_net: bool = False
     show_battery: bool = True
+    show_box: bool = False
+    show_frame: bool = False
 
 
 _ALIGNS = ("left", "center", "right")
@@ -59,6 +61,8 @@ def _from_dict(data) -> Settings:
         show_uptime=bool(data.get("show_uptime", d.show_uptime)),
         show_net=bool(data.get("show_net", d.show_net)),
         show_battery=bool(data.get("show_battery", d.show_battery)),
+        show_box=bool(data.get("show_box", d.show_box)),
+        show_frame=bool(data.get("show_frame", d.show_frame)),
         align=align,
     )
 
@@ -71,7 +75,7 @@ def _to_dict(s: Settings) -> dict:
         "show_machine_info": s.show_machine_info, "show_power": s.show_power,
         "show_details": s.show_details, "show_swap": s.show_swap,
         "show_uptime": s.show_uptime, "show_net": s.show_net,
-        "show_battery": s.show_battery,
+        "show_battery": s.show_battery, "show_box": s.show_box, "show_frame": s.show_frame,
     }
 
 

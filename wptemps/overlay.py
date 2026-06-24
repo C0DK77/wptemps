@@ -122,9 +122,24 @@ def place_top_left(left, top, w, h, screen_w, screen_h):
 def lock_params(locked, desktop_level):
     if locked:
         return {"level": desktop_level + 1, "ignores_mouse": True,
-                "draggable": False, "bg_alpha": 0.0}
+                "draggable": False}
     return {"level": AppKit.NSFloatingWindowLevel, "ignores_mouse": False,
-            "draggable": True, "bg_alpha": _UNLOCKED_BG_ALPHA}
+            "draggable": True}
+
+
+def box_style(locked, show_box, show_frame):
+    """Apparence du calque selon l'etat verrouille et les decorations choisies.
+    En deplacement, le fond reste a 25% (repere de saisie) quel que soit show_box."""
+    fill = (not locked) or show_box
+    bg_alpha = _UNLOCKED_BG_ALPHA if fill else 0.0
+    border_width = 1.0 if show_frame else 0.0
+    rounded = fill or show_frame
+    return {
+        "bg_alpha": bg_alpha,
+        "border_alpha": _UNLOCKED_BG_ALPHA,
+        "border_width": border_width,
+        "corner_radius": 6.0 if rounded else 0.0,
+    }
 
 
 def _alignment_constant(align):
@@ -209,6 +224,8 @@ class OverlayController(AppKit.NSObject):
         self._locked = True
         self._on_moved_cb = None
         self._desktop_level = Quartz.CGWindowLevelForKey(Quartz.kCGDesktopWindowLevelKey)
+        self._show_box = False
+        self._show_frame = False
         self._build_window()
         self.set_locked(True)
         return self
@@ -294,10 +311,22 @@ class OverlayController(AppKit.NSObject):
         self.window.setLevel_(p["level"])
         self.window.setIgnoresMouseEvents_(p["ignores_mouse"])
         self.window.setDraggable_(p["draggable"])
+        self._apply_box_style()
+
+    def set_decorations(self, show_box, show_frame):
+        self._show_box = bool(show_box)
+        self._show_frame = bool(show_frame)
+        self._apply_box_style()
+
+    def _apply_box_style(self):
+        s = box_style(self._locked, self._show_box, self._show_frame)
         layer = self.window.contentView().layer()
         layer.setBackgroundColor_(
-            AppKit.NSColor.blackColor().colorWithAlphaComponent_(p["bg_alpha"]).CGColor())
-        layer.setCornerRadius_(0.0 if self._locked else 6.0)
+            AppKit.NSColor.blackColor().colorWithAlphaComponent_(s["bg_alpha"]).CGColor())
+        layer.setBorderColor_(
+            AppKit.NSColor.blackColor().colorWithAlphaComponent_(s["border_alpha"]).CGColor())
+        layer.setBorderWidth_(s["border_width"])
+        layer.setCornerRadius_(s["corner_radius"])
 
     def _render(self):
         # FIL PRINCIPAL UNIQUEMENT. Compose depuis le dernier echantillon en cache
