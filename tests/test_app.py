@@ -216,3 +216,26 @@ def test_change_color_text_target_unchanged():
     assert app.settings.color == (0, 255, 0)
     assert app.settings.opacity == 255
     assert applied and not isinstance(applied[-1], tuple)   # set_config appelé (chemin texte)
+
+
+def test_font_panel_excludes_effect_modes():
+    # Regression : changer la taille de police avec un fond colore crashait dans
+    # NSFontEffectsBox (_validateFontPanelFontAttributes accedait a une couleur de
+    # fond desallouee). On restreint le panneau a face/taille/collection : pas de
+    # boite d'effets -> pas de chemin de crash.
+    import AppKit
+    import wptemps.app as appmod
+
+    AppKit.NSApplication.sharedApplication()
+    app = appmod.MenuBarApp.alloc().init()
+    mask = app.validModesForFontPanel_(AppKit.NSFontPanel.sharedFontPanel())
+
+    effect_modes = (
+        AppKit.NSFontPanelModeMaskTextColorEffect
+        | AppKit.NSFontPanelModeMaskDocumentColorEffect
+        | AppKit.NSFontPanelModeMaskShadowEffect
+        | AppKit.NSFontPanelModeMaskStrikethroughEffect
+        | AppKit.NSFontPanelModeMaskUnderlineEffect
+    )
+    assert mask & AppKit.NSFontPanelModeMaskSize          # la taille reste reglable
+    assert mask & effect_modes == 0                        # aucun mode d'effet

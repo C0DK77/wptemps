@@ -239,6 +239,16 @@ class MenuBarApp(AppKit.NSObject):
                     save_fn=save)
         self._refresh_checks()
 
+    def validModesForFontPanel_(self, panel):
+        # On n'utilise que la famille, la coupe et la taille. Exclure les modes
+        # d'effets (couleur de texte/fond, ombre, soulignement, barre) empeche
+        # l'affichage de NSFontEffectsBox, dont la validation accedait a une
+        # couleur de fond desallouee et faisait crasher l'app au changement de
+        # taille quand un fond colore avait ete choisi via le selecteur de couleur.
+        return (AppKit.NSFontPanelModeMaskFace
+                | AppKit.NSFontPanelModeMaskSize
+                | AppKit.NSFontPanelModeMaskCollection)
+
     def openFont_(self, sender):
         AppKit.NSApp.activateIgnoringOtherApps_(True)
         fm = AppKit.NSFontManager.sharedFontManager()
@@ -246,9 +256,10 @@ class MenuBarApp(AppKit.NSObject):
                          self.settings.bold, self.settings.italic)
         fm.setSelectedFont_isMultiple_(cur, False)
         fm.orderFrontFontPanel_(self)
-        # masque la barre d'outils du panneau (effets soulignement/couleur/ombre…)
-        # : ces boutons envoient changeAttributes: qu'on n'utilise pas -> inutiles ici.
-        AppKit.NSFontPanel.sharedFontPanel().setToolbar_(None)
+        # NB : on ne touche PAS au toolbar du panneau (setToolbar_(None) mutait
+        # l'interieur de NSFontEffectsBox et laissait un binding KVO/couleur
+        # incoherent -> crash a la validation ou a la destruction). Les effets
+        # sont deja supprimes proprement via validModesForFontPanel_ ci-dessus.
 
     def changeFont_(self, sender):
         fm = AppKit.NSFontManager.sharedFontManager()
