@@ -31,6 +31,8 @@ class Settings:
     show_battery: bool = True
     show_box: bool = False
     show_frame: bool = False
+    box_color: Tuple[int, int, int] = (0, 0, 0)
+    box_opacity: int = 64
 
 
 _ALIGNS = ("left", "center", "right")
@@ -63,6 +65,8 @@ def _from_dict(data) -> Settings:
         show_battery=bool(data.get("show_battery", d.show_battery)),
         show_box=bool(data.get("show_box", d.show_box)),
         show_frame=bool(data.get("show_frame", d.show_frame)),
+        box_color=tuple(data.get("box_color", d.box_color)),
+        box_opacity=int(data.get("box_opacity", d.box_opacity)),
         align=align,
     )
 
@@ -76,6 +80,7 @@ def _to_dict(s: Settings) -> dict:
         "show_details": s.show_details, "show_swap": s.show_swap,
         "show_uptime": s.show_uptime, "show_net": s.show_net,
         "show_battery": s.show_battery, "show_box": s.show_box, "show_frame": s.show_frame,
+        "box_color": list(s.box_color), "box_opacity": s.box_opacity,
     }
 
 

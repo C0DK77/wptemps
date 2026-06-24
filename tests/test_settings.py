@@ -117,3 +117,22 @@ def test_box_frame_default_false_when_absent(tmp_path):
     s = load(str(p))
     assert s.show_box is False
     assert s.show_frame is False
+
+
+def test_box_color_opacity_roundtrip(tmp_path):
+    from wptemps.settings import Settings, load, save
+    p = tmp_path / "settings.json"
+    save(Settings(box_color=(10, 20, 30), box_opacity=128), str(p))
+    s = load(str(p))
+    assert s.box_color == (10, 20, 30)
+    assert s.box_opacity == 128
+
+
+def test_box_color_defaults_when_absent(tmp_path):
+    import json
+    from wptemps.settings import load
+    p = tmp_path / "settings.json"
+    p.write_text(json.dumps({"locked": True}))   # ancien fichier
+    s = load(str(p))
+    assert s.box_color == (0, 0, 0)
+    assert s.box_opacity == 64
