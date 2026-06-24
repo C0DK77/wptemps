@@ -1,92 +1,85 @@
-# wptemps — overlay des températures et infos matériel (macOS)
+<div align="center">
 
-Petite app **barre de menus** qui affiche, en surimpression sur le bureau, les
-températures CPU/GPU, la charge, la RAM, et (en option) la conso en watts, les
-fréquences, le swap, l'uptime, le débit réseau et les infos machine — sans
-jamais modifier ton fond d'écran. **Apple Silicon uniquement.**
+<img src="docs/assets/icon.png" width="128" alt="wptemps"/>
 
-## Installation (utilisateur)
+# wptemps
 
-**Option A — télécharger l'app** : récupère `wptemps-x.y.z.dmg` dans les
-[Releases](../../releases), glisse `wptemps.app` dans Applications, puis
-**clic-droit → Ouvrir** au 1er lancement (app non signée).
+**Les températures et les infos matériel de ton Mac, en surimpression sur le bureau.**
 
-**Option B — Homebrew** :
+Une petite app **barre de menus** discrète — pas de fenêtre, pas d'icône Dock,
+et **ton fond d'écran n'est jamais modifié**.
+
+![macOS](https://img.shields.io/badge/macOS-Apple_Silicon-black?logo=apple)
+![Sans sudo](https://img.shields.io/badge/sans-sudo-success)
+![Licence MIT](https://img.shields.io/badge/licence-MIT-blue)
+
+<img src="docs/assets/screenshot.png" width="380" alt="Aperçu de l'overlay"/>
+
+</div>
+
+## ✨ Ce que ça affiche
+
+- 🌡️ **Températures** CPU et GPU
+- 📊 **Charge** CPU, **RAM**, **batterie**
+- ⚡ **Conso en watts** (CPU / GPU)
+- 🚀 **Détails** : % GPU + fréquences CPU/GPU
+- 💾 **Swap**, ⏱️ **uptime**, 🌐 **débit réseau ↓/↑**
+- 🖥️ **En-tête machine** : OS, modèle, puce, cœurs, RAM, disque
+
+Chaque section est **activable/désactivable** depuis le menu, et tout est **mémorisé**.
+
+## 📦 Installation
+
+> **Apple Silicon uniquement** (M1/M2/M3/M4).
+
+**Option A — Homebrew**
 ```bash
 brew tap C0DK77/tap
-brew install --cask wptemps        # ajouter --no-quarantine pour eviter le clic-droit
+brew trust c0dk77/tap
+brew install --cask wptemps --no-quarantine
 ```
 
-L'app vit dans la **barre de menus** (icône 🌡) — pas d'icône Dock ni de fenêtre.
-Clique l'icône pour afficher/masquer, déplacer, choisir l'apparence et les infos.
+**Option B — Téléchargement**
+Récupère `wptemps-x.y.z.dmg` dans les [Releases](https://github.com/C0DK77/wptemps/releases),
+glisse `wptemps.app` dans Applications, puis **clic-droit → Ouvrir** au 1er lancement.
 
-> Tu veux distribuer cette app ? Voir [DISTRIBUTION.md](DISTRIBUTION.md).
+> L'app n'est pas signée par un compte développeur Apple : d'où le `--no-quarantine`
+> (ou le clic-droit → Ouvrir) au tout premier lancement.
 
-## Prérequis (développement)
-- macOS Apple Silicon
-- `brew install macmon`
-- Python 3.9+
+## 🎛️ Utilisation
 
-## Installation
+Une icône 🌡 apparaît dans la **barre de menus** (en haut à droite). Clique-la :
+
+- **Afficher les températures** — montre / masque l'overlay
+- **Déverrouiller pour déplacer** — glisse l'overlay où tu veux, puis reverrouille
+- **Affichage ▸** — choisis les infos (machine, watts, détails, swap, uptime, réseau, batterie)
+- **Apparence ▸** — police, taille, gras/italique, couleur, alignement
+- **Lancer au démarrage** · **Quitter**
+
+La position et tous les réglages sont sauvegardés dans
+`~/Library/Application Support/wptemps/settings.json`.
+
+## 🔒 Sous le capot
+
+- **Ne touche jamais au fond d'écran** : l'overlay est une fenêtre transparente
+  épinglée au niveau du bureau (derrière tes icônes et fenêtres).
+- **Sans `sudo`** : les capteurs sont lus via [`macmon`](https://github.com/vladkens/macmon)
+  (embarqué dans l'app), en flux continu pour un coût CPU minime.
+- **100 % local** : aucune donnée n'est envoyée nulle part.
+
+## 🛠️ Construire depuis les sources
+
 ```bash
 /usr/bin/python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
+.venv/bin/python -m wptemps.app     # lancer depuis les sources
+bash scripts/make-dmg.sh 1.0.0      # construire le .app et le .dmg
+.venv/bin/pytest -q                 # tests
 ```
 
-## Lancer (app barre de menus)
-```bash
-.venv/bin/python -m wptemps.app
-```
-Une icône 🌡 apparaît dans la barre de menus. Le menu permet d'afficher/masquer,
-de **déverrouiller pour déplacer** l'affichage (puis le reverrouiller), de choisir
-**Police…** (police, taille, gras/italique), **Couleur…** (couleur + opacité) et
-**Alignement** (gauche/centre/droite), **Infos machine** (en-tête OS / modèle / puce /
-cœurs / RAM / disque), **Conso (watts)** (puissance CPU/GPU), **Détails CPU/GPU**
-(% GPU + fréquences), **Swap**, **Uptime** et **Réseau ↓/↑** (débit), et de quitter. Tous ces
-réglages — et la position — sont mémorisés dans `~/Library/Application Support/wptemps/settings.json`.
-Ton fond d'écran n'est **jamais modifié**.
+La distribution (Release + Homebrew) est décrite dans [DISTRIBUTION.md](DISTRIBUTION.md).
 
-Mode overlay seul (sans menu) : `.venv/bin/python -m wptemps.overlay`.
+## 📄 Licence & crédits
 
-> « Lancer au démarrage » depuis le menu n'est actif que pour l'app empaquetée
-> (voir « Construire l'app partageable » plus bas). En mode source, utilise
-> `scripts/install-login-item.sh`.
-
-## Lancer automatiquement à l'ouverture de session
-```bash
-scripts/install-login-item.sh     # installe + démarre l'app barre de menus (LaunchAgent)
-scripts/uninstall-login-item.sh   # la retire du démarrage et l'arrête
-```
-Le LaunchAgent force un `PATH` incluant `/opt/homebrew/bin` (requis pour trouver
-`macmon`). Logs : `/tmp/wptemps_overlay.log` et `/tmp/wptemps_overlay.err`.
-`KeepAlive` est activé : l'overlay est relancé automatiquement s'il s'arrête
-(utilise le script de désinstallation pour l'arrêter pour de bon).
-
-## Configuration
-Réglages dans `wptemps/config.py` : intervalle, position (`top-right`,
-`top-left`, `bottom-left`, `bottom-right`), couleur, opacité, taille de police.
-Si le texte est peu lisible sur un fond clair, augmenter le contraste
-(`color=(0, 0, 0)` ou `opacity=230`).
-
-## Construire l'app partageable (.app)
-```bash
-bash build.sh
-```
-Produit `dist/wptemps.app` : Python, PyObjC et `macmon` sont **embarqués** — le
-destinataire n'installe rien. Cible **Apple Silicon**.
-
-Partage : compresser `dist/wptemps.app` en `.zip` et l'envoyer (ou le déposer sur
-GitHub Releases). L'app n'étant pas signée par un compte développeur Apple, le 1er
-lancement se fait par **clic-droit → Ouvrir** (ensuite, double-clic normal). Une fois
-ouverte, le menu 🌡 propose « Lancer au démarrage ».
-
-Licences tierces : voir `THIRD_PARTY_NOTICES.md` (macmon, MIT).
-
-## Tests
-```bash
-.venv/bin/pytest -q
-```
-
-## Phase 2 (à venir)
-Support Windows (Asus) : lecture des températures via LibreHardwareMonitor
-et application du wallpaper via l'API Windows.
+Code sous licence [MIT](LICENSE). Embarque [`macmon`](https://github.com/vladkens/macmon)
+(MIT) — voir [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
