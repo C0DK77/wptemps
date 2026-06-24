@@ -128,14 +128,18 @@ def lock_params(locked, desktop_level):
 
 
 def box_style(locked, show_box, show_frame):
-    """Apparence du calque selon l'etat verrouille et les decorations choisies.
-    En deplacement, le fond reste a 25% (repere de saisie) quel que soit show_box."""
-    fill = (not locked) or show_box
-    bg_alpha = _UNLOCKED_BG_ALPHA if fill else 0.0
+    """Apparence du calque. fill_mode: 'grab' (repere de deplacement, noir 25%),
+    'custom' (fond colore choisi, verrouille + show_box), 'none' (pas de fond)."""
+    if not locked:
+        fill_mode = "grab"
+    elif show_box:
+        fill_mode = "custom"
+    else:
+        fill_mode = "none"
     border_width = 1.0 if show_frame else 0.0
-    rounded = fill or show_frame
+    rounded = fill_mode != "none" or show_frame
     return {
-        "bg_alpha": bg_alpha,
+        "fill_mode": fill_mode,
         "border_alpha": _UNLOCKED_BG_ALPHA,
         "border_width": border_width,
         "corner_radius": 6.0 if rounded else 0.0,
@@ -226,6 +230,8 @@ class OverlayController(AppKit.NSObject):
         self._desktop_level = Quartz.CGWindowLevelForKey(Quartz.kCGDesktopWindowLevelKey)
         self._show_box = False
         self._show_frame = False
+        self._box_color = (0, 0, 0)
+        self._box_opacity = 64
         self._build_window()
         self.set_locked(True)
         return self
@@ -313,20 +319,30 @@ class OverlayController(AppKit.NSObject):
         self.window.setDraggable_(p["draggable"])
         self._apply_box_style()
 
-    def set_decorations(self, show_box, show_frame):
+    def set_decorations(self, show_box, show_frame, box_color=(0, 0, 0), box_opacity=64):
         self._show_box = bool(show_box)
         self._show_frame = bool(show_frame)
+        self._box_color = tuple(box_color)
+        self._box_opacity = int(box_opacity)
         self._apply_box_style()
 
     def _apply_box_style(self):
         s = box_style(self._locked, self._show_box, self._show_frame)
         layer = self.window.contentView().layer()
-        layer.setBackgroundColor_(
-            AppKit.NSColor.blackColor().colorWithAlphaComponent_(s["bg_alpha"]).CGColor())
+        layer.setBackgroundColor_(self._fill_color(s["fill_mode"]).CGColor())
         layer.setBorderColor_(
             AppKit.NSColor.blackColor().colorWithAlphaComponent_(s["border_alpha"]).CGColor())
         layer.setBorderWidth_(s["border_width"])
         layer.setCornerRadius_(s["corner_radius"])
+
+    def _fill_color(self, fill_mode):
+        if fill_mode == "grab":
+            return AppKit.NSColor.blackColor().colorWithAlphaComponent_(_UNLOCKED_BG_ALPHA)
+        if fill_mode == "custom":
+            r, g, b = self._box_color
+            return AppKit.NSColor.colorWithSRGBRed_green_blue_alpha_(
+                r / 255.0, g / 255.0, b / 255.0, self._box_opacity / 255.0)
+        return AppKit.NSColor.clearColor()
 
     def _render(self):
         # FIL PRINCIPAL UNIQUEMENT. Compose depuis le dernier echantillon en cache
