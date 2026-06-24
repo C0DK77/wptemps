@@ -15,7 +15,7 @@ setup(
             "CFBundleName": "wptemps",
             "CFBundleDisplayName": "wptemps",
             "CFBundleIdentifier": "com.wptemps.app",
-            "CFBundleShortVersionString": "1.0.0",
+            "CFBundleShortVersionString": "1.1.0",
             "NSHumanReadableCopyright": "wptemps — voir THIRD_PARTY_NOTICES.md",
         },
         "packages": ["wptemps"],

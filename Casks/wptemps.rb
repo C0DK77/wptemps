@@ -2,8 +2,8 @@
 # A heberger dans TON tap (depot "homebrew-tap"). Remplace C0DK77
 # et le sha256 (donne par scripts/make-dmg.sh) apres avoir cree la Release.
 cask "wptemps" do
-  version "1.0.0"
-  sha256 "4bb49bef7406dfdbebc20eeaa0795378656233f895c8e7682c80edca7af6807b"
+  version "1.1.0"
+  sha256 "57a74c58d8a5229f0a218834d79d3fd5f8f87af918b2777bdc0e50aae6ed2a8f"
 
   url "https://github.com/C0DK77/wptemps/releases/download/v#{version}/wptemps-#{version}.dmg"
   name "wptemps"
