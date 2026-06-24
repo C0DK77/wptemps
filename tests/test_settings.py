@@ -98,3 +98,22 @@ def test_show_battery_roundtrip_and_default(tmp_path):
     old = tmp_path / "old.json"
     old.write_text(json.dumps({"x": 1}))      # ancien fichier -> defaut True
     assert load(str(old)).show_battery is True
+
+
+def test_box_frame_roundtrip(tmp_path):
+    from wptemps.settings import Settings, load, save
+    p = tmp_path / "settings.json"
+    save(Settings(show_box=True, show_frame=True), str(p))
+    s = load(str(p))
+    assert s.show_box is True
+    assert s.show_frame is True
+
+
+def test_box_frame_default_false_when_absent(tmp_path):
+    import json
+    from wptemps.settings import load
+    p = tmp_path / "settings.json"
+    p.write_text(json.dumps({"locked": True}))   # ancien fichier, sans les nouveaux champs
+    s = load(str(p))
+    assert s.show_box is False
+    assert s.show_frame is False
